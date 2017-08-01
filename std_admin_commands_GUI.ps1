@@ -1,4 +1,5 @@
-﻿$version = "Version 1.1.1"
+﻿$version = "Version 1.1.2"
+$Global:AllDefaultAtts = Import-Csv "C:\scripts\IT_Admin_Tool\DefaultAttsCSV.csv"
 
 Add-Type -AssemblyName PresentationCore,PresentationFramework
 [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic') | Out-Null
@@ -77,9 +78,9 @@ $inputXML = @"
                     <TextBox x:Name="txtbox_ADNU_initial" HorizontalAlignment="Left" Height="26" Margin="71,201,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
                     <Label x:Name="label_ADNU_initial" Content="Initial:" HorizontalAlignment="Left" Margin="28,201,0,0" VerticalAlignment="Top"/>
                     <GroupBox x:Name="grpbox_ADNU_Vaults" Header="Pulse Vaults" HorizontalAlignment="Left" Height="80" Margin="14,260,0,0" VerticalAlignment="Top" Width="180">
-                        <CheckBox x:Name="chkbox_ADNU_Site1City" Content="Site1 Vault" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="80"/>
+                        <CheckBox x:Name="chkbox_ADNU_Site1" Content="OMA Vault" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="80"/>
                     </GroupBox>
-                    <CheckBox x:Name="chkbox_ADNU_Site2City" Content="Site2 VAult" HorizontalAlignment="Left" Margin="30,310,0,0" VerticalAlignment="Top" Width="80"/>
+                    <CheckBox x:Name="chkbox_ADNU_Site2" Content="DGN VAult" HorizontalAlignment="Left" Margin="30,310,0,0" VerticalAlignment="Top" Width="80"/>
                     <GroupBox x:Name="grpbox_ADNU_expiry" Header="Expiry" HorizontalAlignment="Left" Height="49" Margin="259,22,0,0" VerticalAlignment="Top" Width="228">
                         <CheckBox x:Name="chkbox_ADNU_temp" Content="Temp User" HorizontalAlignment="Right" Margin="0,5,132.6,0" VerticalAlignment="Top"/>
                     </GroupBox>
@@ -192,6 +193,45 @@ Get-FormVariables
 #===========================================================================
 
 #=======================#
+#    Some Functions     #
+#=======================#
+
+function Load-ComboBoxes{
+
+    $Global:ComboSiteCodes = @() 
+    $Global:ComboSiteCodes += ""
+    $Global:ComboSiteCodes += $Global:AllDefaultAtts.SiteCode
+
+    ## AD Tools Tab
+    $Global:ComboSiteCodes | ForEach-object {$WPFcombobox_ADCmds_site.AddChild($_)}
+    " " , "Workstation" , "Notebook" | ForEach-object {$WPFcomboBox_type.AddChild($_)}
+
+    ## Create new AD user tab
+    $Global:ComboSiteCodes | ForEach-object {$WPFcombo_ADNU_site.AddChild($_)}
+
+    ## Export AD User Info tab
+    $Global:ComboSiteCodes | ForEach-object {$WPFcombo_EADUI_site.AddChild($_)}
+}
+
+function Get-DefaultAtts{
+    $Site = $WPFcombo_ADNU_Site.SelectedValue
+    $Global:SiteDefaultAtts = $Global:AllDefaultAtts | Where-Object{$_.SiteCode -eq $Site}
+
+    $Groups = $Global:SiteDefaultAtts.DefaultGroups
+    $homeDirectory = $Global:SiteDefaultAtts.HomeDirectory + $logonname + "\"
+    $homeDrive = $Global:SiteDefaultAtts.HomeDrive
+    $company = $Global:SiteDefaultAtts.CompanyAtt
+    $L_city = $Global:SiteDefaultAtts.SiteCity
+    $physicalDeliveryOfficeName = $Global:SiteDefaultAtts.SiteCity
+    $postalCode = $Global:SiteDefaultAtts.PostCode
+    $scriptPath = $Global:SiteDefaultAtts.ScriptPath
+    $st = $Global:SiteDefaultAtts.County
+    $streetAddress = $Global:SiteDefaultAtts.streetAddress
+    $userPrincipalName = "$logonname" + "@" + $Global:SiteDefaultAtts.CompanyName + ".com"
+    $SiteOU = "OU=Users," + $Global:SiteDefaultAtts.OU
+}
+
+#=======================#
 # Main Launcher Buttons #
 #=======================#
 
@@ -262,12 +302,6 @@ $WPFbtn_pulselicense.Add_Click({
 # AD Tools             #
 #======================#
 
-
-### Adding options into combobox ###
-" " , "Site1" , "Site2" , "Site3" , "Site4" , "Site5" , "Site6" | ForEach-object {$WPFcombobox_ADCmds_site.AddChild($_)}
-" " , "Workstation" , "Notebook" | ForEach-object {$WPFcomboBox_type.AddChild($_)}
-
-
 ### Unlock user account ###
 $WPFbtn_unlock.Add_Click({
     $username = $WPFtxtbox_ADCmds_username.Text
@@ -294,7 +328,6 @@ $WPFbtn_unlock.Add_Click({
                                     If ((Get-ADUser  $username -Properties LockedOut | Select-Object LockedOut) -eq $false)
                                     {
                                     $attempt = 5
-                                    #$username =$username.replace('.',' ')
                                     $ButtonType = [System.Windows.MessageBoxButton]::OK
                                     $MessageboxTitle = "Unlock user account"
                                     $Messageboxbody = "$Username" + "'s account has been unlocked!"
@@ -305,7 +338,6 @@ $WPFbtn_unlock.Add_Click({
                                         $attempt = $attempt++
                                         If ($attempt -ge 4)
                                             {
-                                            #$username =$username.replace('.',' ')
                                             $ButtonType = [System.Windows.MessageBoxButton]::OK
                                             $MessageboxTitle = "Unlock user account"
                                             $Messageboxbody = "$Username" + "'s account cannot be unlocked!"
@@ -512,7 +544,7 @@ $WPFbtn_lastBoot.Add_Click({
 
 
 ### Create computer account ###
-# When a selection is made in the Site combobox, enable the Type combobox. When selection is removed, disable Type combobox and btn_computeracc. Update Computer name field autSite1tically with correct computer name prefix.
+# When a selection is made in the Site combobox, enable the Type combobox. When selection is removed, disable Type combobox and btn_computeracc. Update Computer name field automatically with correct computer name prefix.
 $WPFcombobox_ADCmds_site.Add_SelectionChanged({
     $Site = $WPFcombobox_ADCmds_site.SelectedValue
     $kittype = $WPFcombobox_type.SelectedValue
@@ -522,14 +554,16 @@ $WPFcombobox_ADCmds_site.Add_SelectionChanged({
         $WPFcombobox_type.IsEnabled = $true
         $WPFtxtbox_ADCmds_computername.Text = "$site" + "$kit"
         } 
-    If ($Site -eq " ")
+    If (($Site -eq " ") -or ($Site -eq ""))
         {
         $WPFcombobox_type.IsEnabled = $false
         $WPFbtn_computeracc.IsEnabled = $false
+        $WPFcombobox_type.SelectedValue = $null
+        $WPFtxtbox_ADCmds_computername.Text = $null
         }
 })
 
-# When a selection is made in the Site combobox, enable btn_computeracc. When selection is removed, disable btn_computeracc. Update Computer name field autSite1tically with correct computer name prefix.
+# When a selection is made in the Site combobox, enable btn_computeracc. When selection is removed, disable btn_computeracc. Update Computer name field automatically with correct computer name prefix.
 $WPFcombobox_type.Add_SelectionChanged({
     $Site = $WPFcombobox_ADCmds_site.SelectedValue
     $kittype = $WPFcombobox_type.SelectedValue
@@ -560,7 +594,6 @@ $WPFbtn_computeracc.Add_Click({
    $computername = $WPFtxtbox_ADCmds_computername.Text
    $Site = $WPFcombobox_ADCmds_site.SelectedValue
    $KitType = $WPFcombobox_Type.SelectedValue
-
    $computername = $computername.trim()
     
     If ($computername -eq "")
@@ -581,7 +614,7 @@ $WPFbtn_computeracc.Add_Click({
                 [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
                 }
                 ELSE {
-                    If (($Site -ne "Site1") -and ($Site -ne "Site2") -and ($Site -ne "Site3") -and ($Site -ne "Site4") -and ($Site -ne "Site5") -and ($Site -ne "Site6"))
+                     If ($Site -notin $Global:AllDefaultAtts.SiteCode)
                         {
                         $ButtonType = [System.Windows.MessageBoxButton]::OK
                         $MessageboxTitle = "ERROR: Invalid site"
@@ -590,15 +623,15 @@ $WPFbtn_computeracc.Add_Click({
                         [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
                         }
                         ELSE {
+                             $Global:SiteDefaultAtts = $Global:AllDefaultAtts | Where-Object{$_.SiteCode -eq $Site}
                              If($kittype -eq "Notebook")
                                 {
-                                $OU = "OU=Notebooks,OU=" + "$site" + ",OU=UK,DC=CompanyName,DC=local"
+                                $OU = "OU=Notebooks," + $Global:SiteDefaultAtts.OU
                                 $kit = "NB"
-                                
                                 }
-                            If($kittype -eq "Workststion")
+                            If($kittype -eq "Workstation")
                                 {
-                                $OU = "OU=Workstations,OU=" + "$site" + ",OU=UK,DC=CompanyName,DC=local"
+                                $OU = "OU=Workstations," + $Global:SiteDefaultAtts.OU
                                 $Kit = "W"
                                 }
                             # Check requested computer name doesn't already exist #
@@ -620,6 +653,7 @@ $WPFbtn_computeracc.Add_Click({
                                         $MessageIcon = [System.Windows.MessageBoxImage]::Information
                                         [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
                                         } Else {
+                                        Write-Host "OU: "$OU
                                         $ButtonType = [System.Windows.MessageBoxButton]::OK
                                         $MessageboxTitle = "ERROR"
                                         $Messageboxbody = "An error has occured. $computername computer account not created. Aborting!"
@@ -632,7 +666,7 @@ $WPFbtn_computeracc.Add_Click({
                                     $WPFbtn_computeracc.IsEnabled = $false
                                     $WPFtxtbox_ADCmds_computername.Text = ""
                                     }
-                            $WPFtxtbox_ADCmds_computername.Text = $Site + $kit
+                            $WPFtxtbox_ADCmds_computername.Text = $null
                              }
                      }
         }
@@ -678,8 +712,6 @@ $WPFbtn_exportMembers.Add_Click({
 #======================#
 # Create new AD user   #
 #======================#
-
-"" , "Site1" , "Site2" , "Site3" , "Site4" , "Site5" , "Site6" | ForEach-object {$WPFcombo_ADNU_site.AddChild($_)}
 
 ## Update logon name and display name when data is entered
 $WPFtxtbox_ADNU_firstname.Add_TextChanged({
@@ -856,14 +888,14 @@ $WPFbtn_ADNU_validate.Add_Click({
         $dept = $dept.Trim()
         }
 
-    If ($WPFchkbox_ADNU_Site1City.IsChecked -eq $true)
+    If ($WPFchkbox_ADNU_Site1.IsChecked -eq $true)
         {
-        $Site1vault = $true
+        $omavault = $true
         }
 
-    If ($WPFchkbox_ADNU_Site2City.IsChecked -eq $true)
+    If ($WPFchkbox_ADNU_Site2.IsChecked -eq $true)
         {
-        $Site2vault = $true
+        $dgnvault = $true
         }
 
     If ($WPFchkbox_ADNU_temp.IsChecked -eq $true)
@@ -969,8 +1001,8 @@ $WPFbtn_ADNU_validate.Add_Click({
         $WPFtxtbox_ADNU_firstname.IsEnabled = $false
         $WPFtxtbox_ADNU_lastname.IsEnabled = $false
         $WPFtxtbox_ADNU_initial.IsEnabled = $false
-        $WPFchkbox_ADNU_Site1City.IsEnabled = $false
-        $WPFchkbox_ADNU_Site2City.IsEnabled = $false
+        $WPFchkbox_ADNU_Site1.IsEnabled = $false
+        $WPFchkbox_ADNU_Site2.IsEnabled = $false
         $WPFchkbox_ADNU_temp.IsEnabled = $false
         $WPFdatepkr_ADNU_expiry.IsEnabled = $false
         $WPFtxtbox_ADNU_logonname.IsEnabled = $false
@@ -996,8 +1028,8 @@ $WPFbtn_ADNU_resetform.Add_Click({
     $WPFtxtbox_ADNU_firstname.IsEnabled = $true
     $WPFtxtbox_ADNU_lastname.IsEnabled = $true
     $WPFtxtbox_ADNU_initial.IsEnabled = $true
-    $WPFchkbox_ADNU_Site1City.IsEnabled = $true
-    $WPFchkbox_ADNU_Site2City.IsEnabled = $true
+    $WPFchkbox_ADNU_Site1.IsEnabled = $true
+    $WPFchkbox_ADNU_Site2.IsEnabled = $true
     $WPFchkbox_ADNU_temp.IsEnabled = $true
     $WPFtxtbox_ADNU_logonname.IsEnabled = $true
     $WPFtxtbox_ADNU_displayname.IsEnabled = $true
@@ -1022,8 +1054,8 @@ $WPFbtn_ADNU_resetform.Add_Click({
     $WPFtxtbox_ADNU_firstname.Text = $null
     $WPFtxtbox_ADNU_lastname.Text = $null
     $WPFtxtbox_ADNU_initial.Text = $null
-    $WPFchkbox_ADNU_Site1City.IsChecked = $false
-    $WPFchkbox_ADNU_Site2City.IsChecked = $false
+    $WPFchkbox_ADNU_Site1.IsChecked = $false
+    $WPFchkbox_ADNU_Site2.IsChecked = $false
     $WPFchkbox_ADNU_temp.IsChecked = $false
     $WPFtxtbox_ADNU_logonname.Text = $null
     $WPFtxtbox_ADNU_displayname.Text = $null
@@ -1038,8 +1070,8 @@ $WPFbtn_ADNU_edit.Add_Click({
     $WPFtxtbox_ADNU_firstname.IsEnabled = $true
     $WPFtxtbox_ADNU_lastname.IsEnabled = $true
     $WPFtxtbox_ADNU_initial.IsEnabled = $true
-    $WPFchkbox_ADNU_Site1City.IsEnabled = $true
-    $WPFchkbox_ADNU_Site2City.IsEnabled = $true
+    $WPFchkbox_ADNU_Site1.IsEnabled = $true
+    $WPFchkbox_ADNU_Site2.IsEnabled = $true
     $WPFchkbox_ADNU_temp.IsEnabled = $true
     If ($WPFchkbox_ADNU_temp.IsChecked)
         {
@@ -1111,14 +1143,14 @@ $WPFbtn_ADNU_Create.Add_Click({
         {
         $dept = $dept.Trim()
         }
-    If ($WPFchkbox_ADNU_Site1City.IsChecked -eq $true)
+    If ($WPFchkbox_ADNU_Site1.IsChecked -eq $true)
         {
-        $Site1vault = $true
+        $omavault = $true
         }
 
-    If ($WPFchkbox_ADNU_Site2City.IsChecked -eq $true)
+    If ($WPFchkbox_ADNU_Site2.IsChecked -eq $true)
         {
-        $Site2vault = $true
+        $dgnvault = $true
         }
 
     If ($WPFchkbox_ADNU_temp.IsChecked -eq $true)
@@ -1127,104 +1159,31 @@ $WPFbtn_ADNU_Create.Add_Click({
         $ExpireDate = $newDateTime.AddDays(1)
         }
 
-    $userPrincipalName = "$logonname" + "@CompanyName.com"
 
-    ### Set default attributes and pulse vaults if applicable ###
-    IF ($Site -eq "Site1")
-        {
-        $Groups = "SecurityGRP, DistGRP, Site1AppSecurityGRP"
-        $homeDirectory = "\\Site1Server\users$\$logonname\"
-        $homeDrive = "U:"
-        $company = "CompanyName"
-        $L_city = "Site1City"
-        $physicalDeliveryOfficeName = "Site1City"
-        $postalCode = "PostCode"
-        $scriptPath = "Site1LogonScript.bat"
-        $st = "County"
-        $streetAddress = "1stlineAddress"
-        }
-    IF ($Site -eq "Site2")
-        {
-        $Groups = "SecurityGRP, DistGRP"
-        $homeDirectory = "\\Site2Server\users$\$logonname\"
-        $homeDrive = "U:"
-        $company = "CompanyName"
-        $L_city = "Site2City"
-        $physicalDeliveryOfficeName = "Site2City"
-        $postalCode = "PostCode"
-        $scriptPath = "Site2LogonScript.bat"
-        $st = "County"
-        $streetAddress = "1stlineAddress"
-        }
-    IF ($Site -eq "Site3")
-        {
-        $Groups = "SecurityGRP, DistGRP"
-        $homeDirectory = "\\Site2Server\users$\$logonname\"
-        $homeDrive = "U:"
-        $company = "CompanyName"
-        $L_city = "Site2City"
-        $physicalDeliveryOfficeName = "Site2City"
-        $postalCode = "PostCode"
-        $scriptPath = "Site2LogonScript.bat"
-        $st = "County"
-        $streetAddress = "1stlineAddress"
-        }
-    IF ($Site -eq "Site4")
-        {
-        $Groups = "SecurityGRP, DistGRP"
-        $homeDirectory = "\\Site4Server\users$\$logonname\"
-        $homeDrive = "U:"
-        $company = "CompanyName"
-        $L_city = "Site4City"
-        $physicalDeliveryOfficeName = "Site4City"
-        $postalCode = "PostCode"
-        $scriptPath = "Site4LogonScript.bat"
-        $st = "County"
-        $streetAddress = "1stlineAddress"
-        }
-    IF ($Site -eq "Site5")
-        {
-        $Groups = "SecurityGRP, DistGRP"
-        $homeDirectory = "\\Site5Server\users$\$logonname\"
-        $homeDrive = "U:"
-        $company = "CompanyName"
-        $L_city = "Site5City"
-        $physicalDeliveryOfficeName = "Site5City"
-        $postalCode = "PostCode"
-        $scriptPath = "Site5LogonScript.bat"
-        $st = "County"
-        $streetAddress = "1stlineAddress"
-        }
-    IF ($Site -eq "Site6")
-        {
-        $Groups = "SecurityGRP, DistGRP"
-        $homeDirectory = ""
-        $homeDrive = ""
-        $company = "CompanyName"
-        $L_city = "Site5City"
-        $physicalDeliveryOfficeName = "Site5City"
-        $postalCode = "PostCode"
-        $scriptPath = "Site6LogonScript.bat"
-        $st = "Site6cestershire"
-        $streetAddress = "1stlineAddress"
-        }
+
+
+### Set default attributes and pulse vaults if applicable ###
+
+    Get-DefaultAtts
+
     
-    IF (($Site1vault -eq $true) -and ($Site -ne "Site1"))
+    ## Add the Pulse vault security groups if Pulse vaults checked. (OMA vault is added by default to OMA users so no need to add twice)
+    IF (($omavault -eq $true) -and ($Site -ne "OMA"))
         {
-        $Groups = "$Groups" + "," + "Site1AppSecurityGRP"
+        $Groups = "$Groups" + "," + "OMA-Data_PDM_A"
         }                    
     
-    IF ($Site2vault -eq $true)
+    IF ($dgnvault -eq $true)
         {   
-        $Groups = "$Groups" + "," + "Site2AppSecurityGRP"
+        $Groups = "$Groups" + "," + "DGNApp_Pulse"
         }   
-    # Sets the OU where the user account will be created depending on the site entered
-    $SiteOU = "OU=Users,OU=" + "$Site" + ",OU=UK,DC=CompanyName,DC=local"
+
 
 ### This section creates the user account per the details entered by the technician. ###    
 
     # Create User account
-    New-ADUser -SamAccountName $logonname -AccountExpirationDate $ExpireDate -userPrincipalName $userPrincipalName -GivenName $firstname -Surname $lastname -initials $initial -displayName $displayname -department $dept -Name $displayname -Path $SiteOU -Description $job -Title $job -enable $True -AccountPassword (ConvertTo-SecureString -AsPlainText 'CompanyName2017' -Force) -homeDirectory $homeDirectory -homeDrive $homeDrive -company $company -city $L_city -office $physicalDeliveryOfficeName -postalCode $postalCode -scriptPath $scriptPath -state $st -streetAddress $streetAddress -manager $manager
+    New-ADUser -SamAccountName $logonname -AccountExpirationDate $ExpireDate -userPrincipalName $userPrincipalName -GivenName $firstname -Surname $lastname -initials $initial -displayName $displayname -department $dept -Name $displayname -Path $SiteOU -Description $job -Title $job -enable $True -AccountPassword (ConvertTo-SecureString -AsPlainText 'TempPwd2017' -Force) -homeDirectory $homeDirectory -homeDrive $homeDrive -company $company -city $L_city -office $physicalDeliveryOfficeName -postalCode $postalCode -scriptPath $scriptPath -state $st -streetAddress $streetAddress -manager $manager
+    Set-ADUser –Identity $logonname –ChangePasswordAtLogon $true
 
     # Check that user account was created successfully before adding to groups
     IF (dsquery user -samid $logonname)
@@ -1247,8 +1206,8 @@ $WPFbtn_ADNU_Create.Add_Click({
         $WPFtxtbox_ADNU_firstname.IsEnabled = $true
         $WPFtxtbox_ADNU_lastname.IsEnabled = $true
         $WPFtxtbox_ADNU_initial.IsEnabled = $true
-        $WPFchkbox_ADNU_Site1City.IsEnabled = $true
-        $WPFchkbox_ADNU_Site2City.IsEnabled = $true
+        $WPFchkbox_ADNU_Site1.IsEnabled = $true
+        $WPFchkbox_ADNU_Site2.IsEnabled = $true
         $WPFchkbox_ADNU_temp.IsEnabled = $true
         $WPFtxtbox_ADNU_logonname.IsEnabled = $true
         $WPFtxtbox_ADNU_displayname.IsEnabled = $true
@@ -1271,8 +1230,8 @@ $WPFbtn_ADNU_Create.Add_Click({
         $WPFtxtbox_ADNU_firstname.Text = $null
         $WPFtxtbox_ADNU_lastname.Text = $null
         $WPFtxtbox_ADNU_initial.Text = $null
-        $WPFchkbox_ADNU_Site1City.IsChecked = $false
-        $WPFchkbox_ADNU_Site2City.IsChecked = $false
+        $WPFchkbox_ADNU_Site1.IsChecked = $false
+        $WPFchkbox_ADNU_Site2.IsChecked = $false
         $WPFchkbox_ADNU_temp.IsChecked = $false
         $WPFtxtbox_ADNU_logonname.Text = $null
         $WPFtxtbox_ADNU_displayname.Text = $null
@@ -1296,8 +1255,6 @@ $WPFbtn_ADNU_Create.Add_Click({
 #==============================================#
 # Export details of AD user or all users in OU #
 #==============================================#
-
-"" , "Site1" , "Site2" , "Site3" , "Site4" , "Site5" , "Site6" | ForEach-object {$WPFcombo_EADUI_site.AddChild($_)}
 
 ## If radio button Single User is selected, username is enabled and site combobox is disabled
 $WPFradio_EADUI_User.Add_Checked({
@@ -1715,8 +1672,9 @@ $WPFbtn_EADUI_export.Add_Click({
             {
             $attributes += "OfficePhone"
             }
-
-        $OU = "OU=Users,OU=" + "$site" + ",OU=UK,DC=CompanyName,DC=local"
+        
+        $Global:SiteDefaultAtts = $AllDefaultAtts | Where-Object{$_.SiteCode -eq $Site}
+        $OU = "OU=Users," + $Global:SiteDefaultAtts.OU
 
         If($WPFradio_EADUI_OU.IsChecked)
             {
@@ -1754,7 +1712,7 @@ $WPFbtn_EADUI_export.Add_Click({
 #===========================================================================
 # Shows the form
 #===========================================================================
-
+Load-ComboBoxes
 CLS
 Write-Host -ForegroundColor Cyan "IT Admin Tool $Version"
 Write-Host -ForegroundColor Red "Do NOT close this window. Please use the GUI to interact with the IT Admin Tool."
