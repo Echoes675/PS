@@ -1,5 +1,5 @@
-﻿$version = "Version 1.1.2"
-$Global:AllDefaultAtts = Import-Csv "C:\scripts\IT_Admin_Tool\DefaultAttsCSV.csv"
+$version = "Version 1.1.4"
+
 
 Add-Type -AssemblyName PresentationCore,PresentationFramework
 [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic') | Out-Null
@@ -13,7 +13,7 @@ $inputXML = @"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IT_Admin_Tool"
         mc:Ignorable="d"
-        Title="IT Admin Tool" Height="468.109" Width="525" ResizeMode="NoResize">
+        Title="IT Admin Tool" Height="544.109" Width="525" ResizeMode="NoResize">
     <Grid>
         <TabControl Margin="0,0,0.4,0.4">
             <TabItem x:Name="tab_launcher" Header="Launcher">
@@ -22,22 +22,27 @@ $inputXML = @"
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="btn_ADUaC" Content="AD Users &amp; Computers" HorizontalAlignment="Left" Margin="97,51,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
-                    <Button x:Name="btn_PowershellISE" Content="Powershell ISE" HorizontalAlignment="Left" Margin="97,146,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
-                    <Button x:Name="btn_CMD" Content="CMD" HorizontalAlignment="Left" Margin="362,51,0,0" Width="129" Height="26" VerticalAlignment="Top"/>
-                    <Button x:Name="btn_compmgmt" Content="Computer Mgt" HorizontalAlignment="Left" Margin="362,146,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
-                    <Button x:Name="btn_pulseadmin" Content="Pulse Admin" HorizontalAlignment="Left" Margin="97,247,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
-                    <Button x:Name="btn_IE" Content="Internet Explorer" HorizontalAlignment="Left" Margin="362,344,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
-                    <Button x:Name="btn_lockout" Content="Lockout Status" HorizontalAlignment="Left" Margin="97,343,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
-                    <Button x:Name="btn_PulseLicense" Content="Pulse License" HorizontalAlignment="Left" Margin="362,247,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
-                    <Image x:Name="img_ADUaC" HorizontalAlignment="Left" Height="60" Margin="22,33,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\ADUaC.png"/>
-                    <Image x:Name="img_CMD" HorizontalAlignment="Left" Height="60" Margin="274,28,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\cmd.png"/>
-                    <Image x:Name="img_PowershellISE" HorizontalAlignment="Left" Height="60" Margin="22,126,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\powershell_ISE.png"/>
-                    <Image x:Name="img_compmgmt" HorizontalAlignment="Left" Height="60" Margin="274,126,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\compmgmt.png"/>
-                    <Image x:Name="img_lockout" HorizontalAlignment="Left" Height="60" Margin="22,328,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\Account_Lockout.png"/>
-                    <Image x:Name="img_IE" HorizontalAlignment="Left" Height="60" Margin="274,328,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\IE.png"/>
-                    <Image x:Name="img_pulseadmin" HorizontalAlignment="Left" Height="60" Margin="22,231,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\pulse-admin.png"/>
-                    <Image x:Name="img_pulselicense" HorizontalAlignment="Left" Height="60" Margin="274,231,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\pulse-license.png"/>
+                    <Button x:Name="btn_A1" Content="Unassigned" HorizontalAlignment="Left" Margin="97,61,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
+                    <Image x:Name="img_A1" HorizontalAlignment="Left" Height="60" Margin="22,43,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\Default.png"/>
+                    <Button x:Name="btn_A2" Content="Unassigned" HorizontalAlignment="Left" Margin="97,146,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
+                    <Image x:Name="img_A2" HorizontalAlignment="Left" Height="60" Margin="22,126,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\Default.png"/>
+                    <Button x:Name="btn_A3" Content="Unassigned" HorizontalAlignment="Left" Margin="97,235,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
+                    <Image x:Name="img_A3" HorizontalAlignment="Left" Height="60" Margin="22,219,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\Default.png"/>
+                    <Button x:Name="btn_A4" Content="Unassigned" HorizontalAlignment="Left" Margin="97,323,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
+                    <Image x:Name="img_A4" HorizontalAlignment="Left" Height="60" Margin="22,308,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\Default.png"/>
+                    <Button x:Name="btn_A5" Content="Unassigned" HorizontalAlignment="Left" Margin="97,412,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
+                    <Image x:Name="img_A5" HorizontalAlignment="Left" Height="60" Margin="22,400,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\Default.png"/>
+
+                    <Button x:Name="btn_B1" Content="Unassigned" HorizontalAlignment="Left" Margin="362,61,0,0" Width="129" Height="26" VerticalAlignment="Top"/>
+                    <Image x:Name="img_B1" HorizontalAlignment="Left" Height="60" Margin="274,38,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\Default.png"/>
+                    <Button x:Name="btn_B2" Content="Unassigned" HorizontalAlignment="Left" Margin="362,146,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
+                    <Image x:Name="img_B2" HorizontalAlignment="Left" Height="60" Margin="274,126,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\Default.png"/>
+                    <Button x:Name="btn_B3" Content="Unassigned" HorizontalAlignment="Left" Margin="362,235,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
+                    <Image x:Name="img_B3" HorizontalAlignment="Left" Height="60" Margin="274,219,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\Default.png"/>
+                    <Button x:Name="btn_B4" Content="Unassigned" HorizontalAlignment="Left" Margin="362,324,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
+                    <Image x:Name="img_B4" HorizontalAlignment="Left" Height="60" Margin="274,308,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\Default.png"/>
+                    <Button x:Name="btn_B5" Content="Unassigned" HorizontalAlignment="Left" Margin="362,412,0,0" VerticalAlignment="Top" Width="129" Height="26"/>
+                    <Image x:Name="img_B5" HorizontalAlignment="Left" Height="60" Margin="274,400,0,0" VerticalAlignment="Top" Width="60" Source="C:\Scripts\IT_Admin_Tool\icons\Default.png"/>
                 </Grid>
             </TabItem>
             <TabItem x:Name="tab_ADtools" Header="AD commands">
@@ -45,26 +50,41 @@ $inputXML = @"
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-                    <GroupBox x:Name="grpbox_ADCmds_computers" Header="Computers" HorizontalAlignment="Left" Height="124" Margin="10,151,0,0" VerticalAlignment="Top" Width="483"/>
-                    <GroupBox x:Name="grpbox_ADCmds_Users" Header="Users" HorizontalAlignment="Left" Height="110" Margin="10,10,0,0" VerticalAlignment="Top" Width="483"/>
-                    <TextBox x:Name="txtbox_ADCmds_username" Height="26" Margin="113,33,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="369"/>
-                    <Label x:Name="label_Username" Content="Username:" HorizontalAlignment="Left" Margin="42,33,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btn_unlock" Content="Unlock account" HorizontalAlignment="Left" Margin="113,74,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
-                    <Button x:Name="btn_resetPWD" Content="Password Reset" HorizontalAlignment="Left" Margin="249,74,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
-                    <TextBox x:Name="txtbox_ADCmds_computername" HorizontalAlignment="Left" Height="26" Margin="76,189,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="168"/>
-                    <Label x:Name="label_computername" Content="Computer&#xA;name:" HorizontalAlignment="Left" Margin="10,175,0,0" VerticalAlignment="Top" Height="40" Width="66"/>
-                    <Button x:Name="btn_exportGroups" Content="Export Groups" HorizontalAlignment="Left" Margin="382,74,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
-                    <ComboBox x:Name="combobox_ADCmds_site" HorizontalAlignment="Left" Margin="65,234,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
-                    <Label x:Name="label_Site" Content="Site:" HorizontalAlignment="Left" Margin="28,234,0,0" VerticalAlignment="Top" Height="26" RenderTransformOrigin="0.911,0.674"/>
-                    <Button x:Name="btn_computeracc" Content="Create computer account" HorizontalAlignment="Left" Margin="332,234,0,0" VerticalAlignment="Top" Width="150" Height="26" IsEnabled="False"/>
-                    <TextBox x:Name="txtbox_ADCmds_group" HorizontalAlignment="Left" Height="26" Margin="113,333,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="244"/>
-                    <Label x:Name="label_group" Content="Group name:" HorizontalAlignment="Left" Margin="28,333,0,0" VerticalAlignment="Top" Height="26" Width="80"/>
-                    <Button x:Name="btn_exportMembers" Content="Export Members" HorizontalAlignment="Left" Margin="382,333,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
-                    <Button x:Name="btn_loggedOn" Content="Who is logged on" HorizontalAlignment="Left" Margin="249,189,0,0" VerticalAlignment="Top" Width="117" Height="26"/>
-                    <Button x:Name="btn_lastBoot" Content="Last Boot" HorizontalAlignment="Left" Margin="382,189,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
-                    <ComboBox x:Name="combobox_Type" HorizontalAlignment="Left" Margin="218,234,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
-                    <Label x:Name="label_type" Content="Type:" HorizontalAlignment="Left" Margin="175,234,0,0" VerticalAlignment="Top"/>
-                    <GroupBox x:Name="grpbox_ADCmds_groups" Header="Groups" HorizontalAlignment="Left" Height="81" Margin="10,299,0,0" VerticalAlignment="Top" Width="483"/>
+                    <GroupBox x:Name="grpbox_ADCmds_groups" Header="Groups" HorizontalAlignment="Left" Height="67" Margin="10,393,0,0" VerticalAlignment="Top" Width="483"/>
+                    <GroupBox x:Name="grpbox_ADCmds_computers" Header="Computers" HorizontalAlignment="Left" Height="124" Margin="10,264,0,0" VerticalAlignment="Top" Width="483"/>
+                    <GroupBox x:Name="grpbox_ADCmds_Users" Header="Users" HorizontalAlignment="Left" Height="97" Margin="10,162,0,0" VerticalAlignment="Top" Width="483"/>
+                    <TextBox x:Name="txtbox_ADCmds_username" Height="26" Margin="113,15,0,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="203"/>
+                    <Label x:Name="label_Username" Content="Username:" HorizontalAlignment="Left" Margin="42,15,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="btn_unlock" Content="Unlock account" HorizontalAlignment="Left" Margin="28,188,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+                    <Button x:Name="btn_resetPWD" Content="Password Reset" HorizontalAlignment="Left" Margin="135,188,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+                    <TextBox x:Name="txtbox_ADCmds_computername" HorizontalAlignment="Left" Height="26" Margin="113,41,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="203"/>
+                    <Label x:Name="label_computername" Content="Computer name:" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top" Height="26" Width="98"/>
+                    <Button x:Name="btn_exportGroups" Content="Export Groups" HorizontalAlignment="Left" Margin="240,188,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+                    <ComboBox x:Name="combobox_ADCmds_site" HorizontalAlignment="Left" Margin="392,15,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+                    <Label x:Name="label_Site" Content="Site:" HorizontalAlignment="Left" Margin="360,15,0,0" VerticalAlignment="Top" Height="26" RenderTransformOrigin="0.911,0.674"/>
+                    <Button x:Name="btn_computeracc" Content="Create Comp Acct" HorizontalAlignment="Left" Margin="36,349,0,0" VerticalAlignment="Top" Width="117" Height="26" IsEnabled="False"/>
+                    <TextBox x:Name="txtbox_ADCmds_group" HorizontalAlignment="Left" Height="26" Margin="113,67,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="203"/>
+                    <Label x:Name="label_group" Content="Group name:" HorizontalAlignment="Left" Margin="28,67,0,0" VerticalAlignment="Top" Height="26" Width="80"/>
+                    <TextBox x:Name="txtbox_ADCmds_dirpath" HorizontalAlignment="Left" Height="26" Margin="113,93,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="203" IsEnabled="False"/>
+                    <Label x:Name="label_dirpath" Content="Directory Path:" HorizontalAlignment="Left" Margin="19,93,0,0" VerticalAlignment="Top" Height="26" Width="89"/>
+
+                    <Button x:Name="btn_exportMembers" Content="Export Members" HorizontalAlignment="Left" Margin="42,419,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+                    <Button x:Name="btn_loggedOn" Content="Who is logged on" HorizontalAlignment="Left" Margin="36,302,0,0" VerticalAlignment="Top" Width="117" Height="26"/>
+                    <Button x:Name="btn_lastBoot" Content="Last Boot" HorizontalAlignment="Left" Margin="158,302,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+                    <ComboBox x:Name="combobox_Type" HorizontalAlignment="Left" Margin="392,41,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+                    <Label x:Name="label_kittype" Content="Kit Type:" HorizontalAlignment="Left" Margin="337,41,0,0" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="combobox_GrpType" HorizontalAlignment="Left" Margin="392,67,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+                    <Label x:Name="label_Grptype" Content="Group Type:" HorizontalAlignment="Left" Margin="317,67,0,0" VerticalAlignment="Top"/>
+                    <Button x:Name="btn_discomputeracc" Content="Disable Comp Acc" HorizontalAlignment="Left" Margin="263,302,0,0" VerticalAlignment="Top" Width="105" Height="26"/>
+                    <Button x:Name="btn_encomputeracc" Content="Enble Comp Acc" HorizontalAlignment="Left" Margin="373,302,0,0" VerticalAlignment="Top" Width="105" Height="26"/>
+                    <Button x:Name="btn_addlocalAdmin" Content="Add Local Admin" HorizontalAlignment="Left" Margin="28,219,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+                    <Button x:Name="btn_remlocalAdmin" Content="Rmv Loc Admin" HorizontalAlignment="Left" Margin="135,219,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+                    <Button x:Name="btn_createGroup" Content="Create Group" HorizontalAlignment="Left" Margin="149,419,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+                    <Button x:Name="btn_addUsertoGroup" Content="Add to Group" HorizontalAlignment="Left" Margin="240,219,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+                    <Button x:Name="btn_rmvUserfromGroup" Content="Remove from Grp" HorizontalAlignment="Left" Margin="345,219,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+                    <Button x:Name="btn_addGrpAuthor" Content="Add as Author" HorizontalAlignment="Left" Margin="255,419,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+                    <Button x:Name="btn_addread" Content="Add as Read Only" HorizontalAlignment="Left" Margin="360,419,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
+
                 </Grid>
             </TabItem>
             <TabItem x:Name="tab_NewADUser" Header="New AD User">
@@ -78,9 +98,9 @@ $inputXML = @"
                     <TextBox x:Name="txtbox_ADNU_initial" HorizontalAlignment="Left" Height="26" Margin="71,201,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
                     <Label x:Name="label_ADNU_initial" Content="Initial:" HorizontalAlignment="Left" Margin="28,201,0,0" VerticalAlignment="Top"/>
                     <GroupBox x:Name="grpbox_ADNU_Vaults" Header="Pulse Vaults" HorizontalAlignment="Left" Height="80" Margin="14,260,0,0" VerticalAlignment="Top" Width="180">
-                        <CheckBox x:Name="chkbox_ADNU_Site1" Content="OMA Vault" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="80"/>
+                        <CheckBox x:Name="chkbox_ADNU_omagh" Content="OMA Vault" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="80"/>
                     </GroupBox>
-                    <CheckBox x:Name="chkbox_ADNU_Site2" Content="DGN VAult" HorizontalAlignment="Left" Margin="30,310,0,0" VerticalAlignment="Top" Width="80"/>
+                    <CheckBox x:Name="chkbox_ADNU_dungannon" Content="DGN VAult" HorizontalAlignment="Left" Margin="30,310,0,0" VerticalAlignment="Top" Width="80"/>
                     <GroupBox x:Name="grpbox_ADNU_expiry" Header="Expiry" HorizontalAlignment="Left" Height="49" Margin="259,22,0,0" VerticalAlignment="Top" Width="228">
                         <CheckBox x:Name="chkbox_ADNU_temp" Content="Temp User" HorizontalAlignment="Right" Margin="0,5,132.6,0" VerticalAlignment="Top"/>
                     </GroupBox>
@@ -196,6 +216,116 @@ Get-FormVariables
 #    Some Functions     #
 #=======================#
 
+function Load-CSVData{
+
+$Global:AllDefaultAtts = Import-Csv "C:\scripts\IT_Admin_Tool\DefaultAttsCSV.csv"
+$Global:LauncherApps = Import-Csv "C:\scripts\IT_Admin_Tool\LauncherApplicationsCSV.csv"
+
+}
+
+function Load-LauncherButtons{
+
+$Appdetails = $Global:LauncherApps | Where-Object{$_.BtnID -eq "A1"}
+$WPFbtn_A1.Content = $Appdetails.AppName
+$WPFimg_A1.Source = $Appdetails.IconPath
+$Global:cmd_A1 = $Appdetails.AppPathCommand
+$Global:prerun_A1 = $Appdetails.PreRunCmd
+If ($Appdetails.AppName -eq ""){
+    $WPFbtn_A1.Visibility = "Hidden"
+    $WPFimg_A1.Visibility = "Hidden"
+}
+
+$Appdetails = $Global:LauncherApps | Where-Object{$_.BtnID -eq "A2"}
+$WPFbtn_A2.Content = $Appdetails.AppName
+$WPFimg_A2.Source = $Appdetails.IconPath
+$Global:cmd_A2 = $Appdetails.AppPathCommand
+$Global:prerun_A2 = $Appdetails.PreRunCmd
+If ($Appdetails.AppName -eq ""){
+    $WPFbtn_A2.Visibility = "Hidden"
+    $WPFimg_A2.Visibility = "Hidden"
+}
+
+$Appdetails = $Global:LauncherApps | Where-Object{$_.BtnID -eq "A3"}
+$WPFbtn_A3.Content = $Appdetails.AppName
+$WPFimg_A3.Source = $Appdetails.IconPath
+$Global:cmd_A3 = $Appdetails.AppPathCommand
+$Global:prerun_A3 = $Appdetails.PreRunCmd
+If ($Appdetails.AppName -eq ""){
+    $WPFbtn_A3.Visibility = "Hidden"
+    $WPFimg_A3.Visibility = "Hidden"
+}
+
+$Appdetails = $Global:LauncherApps | Where-Object{$_.BtnID -eq "A4"}
+$WPFbtn_A4.Content = $Appdetails.AppName
+$WPFimg_A4.Source = $Appdetails.IconPath
+$Global:cmd_A4 = $Appdetails.AppPathCommand
+$Global:prerun_A4 = $Appdetails.PreRunCmd
+If ($Appdetails.AppName -eq ""){
+    $WPFbtn_A4.Visibility = "Hidden"
+    $WPFimg_A4.Visibility = "Hidden"
+}
+
+$Appdetails = $Global:LauncherApps | Where-Object{$_.BtnID -eq "A5"}
+$WPFbtn_A5.Content = $Appdetails.AppName
+$WPFimg_A5.Source = $Appdetails.IconPath
+$Global:cmd_A5 = $Appdetails.AppPathCommand
+$Global:prerun_A5 = $Appdetails.PreRunCmd
+If ($Appdetails.AppName -eq ""){
+    $WPFbtn_A5.Visibility = "Hidden"
+    $WPFimg_A5.Visibility = "Hidden"
+}
+
+$Appdetails = $Global:LauncherApps | Where-Object{$_.BtnID -eq "B1"}
+$WPFbtn_B1.Content = $Appdetails.AppName
+$WPFimg_B1.Source = $Appdetails.IconPath
+$Global:cmd_B1 = $Appdetails.AppPathCommand
+$Global:prerun_B1 = $Appdetails.PreRunCmd
+If ($Appdetails.AppName -eq ""){
+    $WPFbtn_B1.Visibility = "Hidden"
+    $WPFimg_B1.Visibility = "Hidden"
+}
+
+$Appdetails = $Global:LauncherApps | Where-Object{$_.BtnID -eq "B2"}
+$WPFbtn_B2.Content = $Appdetails.AppName
+$WPFimg_B2.Source = $Appdetails.IconPath
+$Global:cmd_B2 = $Appdetails.AppPathCommand
+$Global:prerun_B2 = $Appdetails.PreRunCmd
+If ($Appdetails.AppName -eq ""){
+    $WPFbtn_B2.Visibility = "Hidden"
+    $WPFimg_B2.Visibility = "Hidden"
+}
+
+$Appdetails = $Global:LauncherApps | Where-Object{$_.BtnID -eq "B3"}
+$WPFbtn_B3.Content = $Appdetails.AppName
+$WPFimg_B3.Source = $Appdetails.IconPath
+$Global:cmd_B3 = $Appdetails.AppPathCommand
+$Global:prerun_B3 = $Appdetails.PreRunCmd
+If ($Appdetails.AppName -eq ""){
+    $WPFbtn_B3.Visibility = "Hidden"
+    $WPFimg_B3.Visibility = "Hidden"
+}
+
+$Appdetails = $Global:LauncherApps | Where-Object{$_.BtnID -eq "B4"}
+$WPFbtn_B4.Content = $Appdetails.AppName
+$WPFimg_B4.Source = $Appdetails.IconPath
+$Global:cmd_B4 = $Appdetails.AppPathCommand
+$Global:prerun_B4 = $Appdetails.PreRunCmd
+If ($Appdetails.AppName -eq ""){
+    $WPFbtn_B4.Visibility = "Hidden"
+    $WPFimg_B4.Visibility = "Hidden"
+}
+
+$Appdetails = $Global:LauncherApps | Where-Object{$_.BtnID -eq "B5"}
+$WPFbtn_B5.Content = $Appdetails.AppName
+$WPFimg_B5.Source = $Appdetails.IconPath
+$Global:cmd_B5 = $Appdetails.AppPathCommand
+$Global:prerun_B5 = $Appdetails.PreRunCmd
+If ($Appdetails.AppName -eq ""){
+    $WPFbtn_B5.Visibility = "Hidden"
+    $WPFimg_B5.Visibility = "Hidden"
+}
+}
+
 function Load-ComboBoxes{
 
     $Global:ComboSiteCodes = @() 
@@ -205,6 +335,7 @@ function Load-ComboBoxes{
     ## AD Tools Tab
     $Global:ComboSiteCodes | ForEach-object {$WPFcombobox_ADCmds_site.AddChild($_)}
     " " , "Workstation" , "Notebook" | ForEach-object {$WPFcomboBox_type.AddChild($_)}
+    " " , "-Data_" , "-Data_Dept" , "-DST_" , "-MBX-"| ForEach-object {$WPFcomboBox_Grptype.AddChild($_)}
 
     ## Create new AD user tab
     $Global:ComboSiteCodes | ForEach-object {$WPFcombo_ADNU_site.AddChild($_)}
@@ -235,66 +366,99 @@ function Get-DefaultAtts{
 # Main Launcher Buttons #
 #=======================#
 
+# When clicked the buttons will execute any pre-run commands saved in the CSV file before executing the 
 
-### AD Users & Computers ###
-$WPFbtn_ADUac.Add_Click({ 
-    Start-Process dsa /32
+### Button A1 ###
+$WPFbtn_A1.Add_Click({ 
+
+If (($prerun_A1 -ne $null) -and ($prerun_A1 -ne ""))
+    {
+    Invoke-Expression $prerun_A1
+    }
+    Start-Process $cmd_A1
 })
  
-
-### Command Prompt ###
-$WPFbtn_CMD.Add_Click({
-    Start-Process cmd
-}) 
-
-
-### Computer Management ###
-$WPFbtn_compmgmt.Add_Click({ 
-    Start-Process compmgmt.msc
-}) 
-
-
-### Internet Explorer ###
-$WPFbtn_IE.Add_Click({
-    Start-process iexplore.exe
-}) 
-
-
-### Account lockout status ###
-$WPFbtn_lockout.Add_Click({ 
-    Start-Process lockoutstatus.exe
-}) 
-
-
-### Powershell ISE ###
-$WPFbtn_PowershellISE.Add_Click({ 
-    Start-Process PowerShell_ISE.exe
-})
-
-
-### Pulse Administration ###
-$WPFbtn_pulseadmin.Add_Click({ 
-    DO {
-        $reg = $null
-        $SID = Get-ADUser -Identity $env:USERNAME | select SID
-        $Sidft = $SID.SID
-        $regquery = "HKU\" + "$SIDft" + "\Software\VB and VBA Program Settings\Pulse Data Manager"
-
-        IF (!(REG QUERY $regquery)) 
-            { 
-            regedit.exe /s "C:\scripts\IT_Admin_Tool\pulse_vaults_A2.reg" 
-            $reg = "m"
-            }
+ ### Button A2 ###
+$WPFbtn_A2.Add_Click({ 
+If (($prerun_A2 -ne $null) -and ($prerun_A2 -ne ""))
+    {
+    Invoke-Expression $prerun_A2
     }
-    While ($reg -eq "m") 
-
-    Start-Process "C:\Program Files (x86)\Pulse PLM\Administration.exe"
+    Start-Process $cmd_A2
 })
 
 
-### Pulse License upload ###
-$WPFbtn_pulselicense.Add_Click({
-    Start-Process "C:\Program Files (x86)\Pulse PLM\PLM Load Server License.exe"
+### Button A3 ###
+$WPFbtn_A3.Add_Click({ 
+If (($prerun_A3 -ne $null) -and ($prerun_A3 -ne ""))
+    {
+    Invoke-Expression $prerun_A3
+    }
+    Start-Process $cmd_A3
+})
+
+### Button A4 ###
+$WPFbtn_A4.Add_Click({ 
+If (($prerun_A4 -ne $null) -and ($prerun_A4 -ne ""))
+    {
+    Invoke-Expression $prerun_A4
+    }
+    Start-Process $cmd_A4
+}) 
+
+### Button A5 ###
+$WPFbtn_A5.Add_Click({
+If (($prerun_A5 -ne $null) -and ($prerun_A5 -ne ""))
+    {
+    Invoke-Expression $prerun_A5
+    }
+    Start-Process $cmd_A5
+})
+
+### Button B1 ###
+$WPFbtn_B1.Add_Click({
+If (($prerun_B1 -ne $null) -and ($prerun_B1 -ne ""))
+    {
+    Invoke-Expression $prerun_B1
+    }
+    Start-Process $cmd_B1
+}) 
+
+
+### Button B2 ###
+$WPFbtn_B2.Add_Click({ 
+If (($prerun_B2 -ne $null) -and ($prerun_B2 -ne ""))
+    {
+    Invoke-Expression $prerun_B2
+    }
+    Start-Process $cmd_B2
+}) 
+
+### Button B3 ###
+$WPFbtn_B3.Add_Click({
+If (($prerun_B3 -ne $null) -and ($prerun_B3 -ne ""))
+    {
+    Invoke-Expression $prerun_B3
+    }
+    Start-Process $cmd_B3
+})
+
+### Button B4 ###
+$WPFbtn_B4.Add_Click({
+If (($prerun_B4 -ne $null) -and ($prerun_B4 -ne ""))
+    {
+    Invoke-Expression $prerun_B4
+    }
+    Start-Process $cmd_B4
+}) 
+
+### Button B5 ###
+$WPFbtn_B5.Add_Click({
+If (($prerun_A1 -ne $null) -and ($prerun_B5 -ne ""))
+    {
+    Invoke-Expression $prerun_B5
+    }
+    Start-Process $cmd_B5
 })
 
 
@@ -365,6 +529,7 @@ $WPFbtn_unlock.Add_Click({
                         $MessageIcon = [System.Windows.MessageBoxImage]::Error
                         [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
                         }
+    $WPFtxtbox_ADCmds_username.Text = $null
     Get-module | Remove-Module        
             }
 })
@@ -406,6 +571,7 @@ $WPFbtn_resetPWD.Add_Click({
                         $MessageIcon = [System.Windows.MessageBoxImage]::Error
                         [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
                         }
+    $WPFtxtbox_ADCmds_username.Text = $null
     Get-module | Remove-Module        
             }
 
@@ -445,6 +611,7 @@ $WPFbtn_exportGroups.Add_Click({
                     [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
                     }
               }
+    $WPFtxtbox_ADCmds_username.Text = $null
     Get-module | Remove-Module 
 })
 
@@ -492,6 +659,7 @@ $WPFbtn_loggedOn.Add_Click({
                             }
                     }
             }
+    $WPFtxtbox_ADCmds_computername.Text = $null
     Get-module | Remove-Module 
 })
 
@@ -539,20 +707,37 @@ $WPFbtn_lastBoot.Add_Click({
                             }
                       }
             }
+    $WPFtxtbox_ADCmds_computername.Text = $null
     Get-module | Remove-Module 
 })
 
 
-### Create computer account ###
+
 # When a selection is made in the Site combobox, enable the Type combobox. When selection is removed, disable Type combobox and btn_computeracc. Update Computer name field automatically with correct computer name prefix.
 $WPFcombobox_ADCmds_site.Add_SelectionChanged({
     $Site = $WPFcombobox_ADCmds_site.SelectedValue
     $kittype = $WPFcombobox_type.SelectedValue
 
+    If($WPFtxtbox_ADCmds_computername.Text -ne $null)
+        {
+        $IDno = [regex]::Matches($WPFtxtbox_ADCmds_computername.Text, "\d+(?!.*\d+)").value
+        }
+    If($kittype -eq "Notebook")
+        {
+        $kit = "NB"
+        } 
+        ELSE {
+            If($kittype -eq "Workstation")
+                {
+            $Kit = "W"
+                } 
+            }
+
     If($Site -ne " ")
         {
         $WPFcombobox_type.IsEnabled = $true
-        $WPFtxtbox_ADCmds_computername.Text = "$site" + "$kit"
+        $WPFcombobox_Grptype.IsEnabled = $true
+        $WPFtxtbox_ADCmds_computername.Text = $site + $kit + $IDno
         } 
     If (($Site -eq " ") -or ($Site -eq ""))
         {
@@ -567,7 +752,10 @@ $WPFcombobox_ADCmds_site.Add_SelectionChanged({
 $WPFcombobox_type.Add_SelectionChanged({
     $Site = $WPFcombobox_ADCmds_site.SelectedValue
     $kittype = $WPFcombobox_type.SelectedValue
-
+    If($WPFtxtbox_ADCmds_computername.Text -ne $null)
+        {
+        $IDno = [regex]::Matches($WPFtxtbox_ADCmds_computername.Text, "\d+(?!.*\d+)").value
+        }
     If($kittype -eq "Notebook")
         {
         $kit = "NB"
@@ -586,9 +774,10 @@ $WPFcombobox_type.Add_SelectionChanged({
                         }
                       }
             }
-    $WPFtxtbox_ADCmds_computername.Text = "$site" + "$kit"
+    $WPFtxtbox_ADCmds_computername.Text = $site + $kit + $IDno
 })
 
+### Create computer account ###
 # When btn_computeracc is clicked, validate data and create the computer account
 $WPFbtn_computeracc.Add_Click({
    $computername = $WPFtxtbox_ADCmds_computername.Text
@@ -706,6 +895,7 @@ $WPFbtn_exportMembers.Add_Click({
                     [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
                     }
             }
+    $WPFtxtbox_ADCmds_Group.Text = $null
     Get-module | Remove-Module 
 })
 
@@ -1709,9 +1899,11 @@ $WPFbtn_EADUI_export.Add_Click({
 
 
 
-#===========================================================================
-# Shows the form
-#===========================================================================
+#===========================================================================#
+# Imports settings and shows the GUI                                        #
+#===========================================================================#
+Load-CSVData
+Load-LauncherButtons
 Load-ComboBoxes
 CLS
 Write-Host -ForegroundColor Cyan "IT Admin Tool $Version"
