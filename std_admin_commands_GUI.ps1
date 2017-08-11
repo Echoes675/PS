@@ -1,5 +1,5 @@
-$Global:version = "Version 1.1.10"
-$Global:installpath = "C:\Scripts\IT_Admin_Tool\"
+$Global:version = "Version 1.2.0"
+$Global:installpath = $PSScriptRoot
 
 Add-Type -AssemblyName PresentationCore,PresentationFramework
 [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic') | Out-Null
@@ -148,8 +148,8 @@ $inputXML = @"
                     <GroupBox x:Name="grpbox_EADUI_Scope" Header="Scope" HorizontalAlignment="Left" Height="126" Margin="10,10,0,0" VerticalAlignment="Top" Width="487"/>
                     <RadioButton x:Name="radio_EADUI_User" Content="Single user" HorizontalAlignment="Left" Margin="29,36,0,0" VerticalAlignment="Top" IsChecked="True"/>
                     <TextBox x:Name="txtbox_EADUI_username" Height="26" Margin="275,31,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" VerticalScrollBarVisibility="Disabled"/>
-                    <TextBlock x:Name="txtblock_EADUI_errorusername" HorizontalAlignment="Left" Margin="480,36,0,0" TextWrapping="NoWrap" Text="!" VerticalAlignment="Top" Foreground="Red" FontWeight="Bold" Visibility="Hidden"/>
-                    <TextBlock x:Name="txtblock_EADUI_erroruserunique" HorizontalAlignment="Left" Margin="279,56,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="200" Foreground="Red" Visibility="Hidden"><Run Text="User does not exist in AD. Please enter valid "/><Run Text="user"/><Run Text="name"/></TextBlock>
+                    <TextBlock x:Name="txtblock_EADUI_errorusername" HorizontalAlignment="Left" Margin="480,36,0,0" TextWrapping="Wrap" Text="!" VerticalAlignment="Top" Foreground="Red" FontWeight="Bold" Visibility="Hidden"/>
+                    <TextBlock x:Name="txtblock_EADUI_erroruserunique" HorizontalAlignment="Left" Margin="279,56,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="200" Foreground="Red" Visibility="Hidden"><Run Text="User does not exist in AD. Please enter valid "/><Run Text="user"/><Run Text="name"/></TextBlock>
                     <RadioButton x:Name="radio_EADUI_OU" Content="Users in OU" HorizontalAlignment="Left" Margin="29,103,0,0" VerticalAlignment="Top"/>
                     <Label x:Name="label_EADUI_username" Content="Username:" HorizontalAlignment="Left" Height="25" Margin="204,31,0,0" VerticalAlignment="Top" Width="66"/>
                     <Label x:Name="label_EADUI_username_Copy" Content="Site:" HorizontalAlignment="Left" Height="25" Margin="237,93,0,0" VerticalAlignment="Top" Width="33"/>
@@ -198,6 +198,7 @@ $inputXML = @"
             <MenuItem x:Name="menu_main_help" Header="Help" Height="100" Width="100"/>
         </Menu>
         <TextBox x:Name="txtbox_main_log" HorizontalAlignment="Left" Height="584" Margin="554,56,0,0" TextWrapping="Wrap" Text="Logs" VerticalAlignment="Top" Width="230" VerticalScrollBarVisibility="Auto"/>
+        <TextBlock x:Name="txtblock_main_logtitle" HorizontalAlignment="Left" Margin="554,34,0,0" TextWrapping="Wrap" Text="Log Title" VerticalAlignment="Top" Height="25" Width="230"/>
     </Grid>
 </Window>
 
@@ -310,7 +311,7 @@ function Display-Error{
     [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
     $Global:LogStatus = "ERROR"
     $Global:LogMSG = $Messageboxbody
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 }
 
 function Display-Warning{
@@ -319,7 +320,7 @@ function Display-Warning{
     [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
     $Global:LogStatus = "WARNING"
     $Global:LogMSG = $Messageboxbody
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 }
 
 function Display-Info{
@@ -328,7 +329,16 @@ function Display-Info{
     [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $Messageboxbody
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
+}
+
+function Display-Success{
+    $ButtonType = [System.Windows.MessageBoxButton]::OK
+    $MessageIcon = [System.Windows.MessageBoxImage]::Information
+    [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
+    $Global:LogStatus = "SUCCESS"
+    $Global:LogMSG = $Messageboxbody
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 }
 
 function Load-CSVData{
@@ -520,7 +530,7 @@ function Load-Logs{
     $Time = Get-Date -UFormat "%H:%M:%S"
 
     $Global:logfilename = $env:USERNAME + "_" + $Date + ".log"
-    $Global:logpath = $installpath + "logs\"
+    $Global:logpath = $installpath + "\logs\"
     $Global:logfullpath = $logpath + $logfilename
     $logloaderror = $null
 
@@ -531,12 +541,14 @@ function Load-Logs{
             If (Test-Path $logfullpath)
                     {
                     $WPFtxtbox_main_log.Text = (Get-Content $logfullpath) -join "`n"
+                    $WPFtxtblock_main_logtitle.Text = "Logs: " + $Date
                     $logloaderror = $null
                     } Else {
                         New-Item $logfullpath -ItemType file
                         $Global:LogStatus = "INFO"
+                        $Global:LogModule = "MAIN"
                         $Global:LogMSG = "New Log file generated"
-                        Update-Logfile $Global:LogStatus $Global:LogMSG
+                        Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
                         $logloaderror++
                         }
             } Else {
@@ -554,16 +566,16 @@ function Load-Logs{
 
 }
 
-function Update-LogFile ($Global:LogStatus,$Global:LogMSG){
+function Update-LogFile ($Global:LogStatus,$Global:LogModule,$Global:LogMSG){
     $Date = Get-Date -UFormat "%d-%m-%Y"
     $DateTime = Get-Date
     $Time = Get-Date -UFormat "%H:%M:%S"
 
     $Global:logfilename = $env:USERNAME + "_" + $Date + ".log"
-    $Global:logpath = $installpath + "logs\"
+    $Global:logpath = $installpath + "\logs\"
     $Global:logfullpath = $logpath + $logfilename
     $LogCurrentContent = Get-Content $logfullpath
-    $NewLogContent = $Global:LogStatus + " | " + $Time + " | " + $Global:LogMSG
+    $NewLogContent = $Global:LogStatus + " | " + $Time + " | " + $LogModule + " | " + $Global:LogMSG
     
     Set-Content $logfullpath -value $null
     Add-Content $logfullpath $NewLogContent
@@ -727,6 +739,7 @@ function Enable-AdditionalAtts{
 }
 
 function Set-GroupNTFSAccess ($Account,$Path,$AccessRights){
+    $Global:LogModule = "GroupNTFSAccess"
     # If Group and Dir fields are not blank
     If (($Account -ne " ") -and ($account -ne "") -and ($account -ne $null) -and ($Path -ne " ") -and ($Path -ne "") -and ($Path -ne $null))
         {
@@ -740,70 +753,59 @@ function Set-GroupNTFSAccess ($Account,$Path,$AccessRights){
                 # Confirm the permissions are set
                 $permission = (Get-Acl $Path).Access | ?{$_.IdentityReference -match $Account} | Select IdentityReference,FileSystemRights
                 If ($permission){
-                    $MessageboxTitle = "SUCCESS"
                     $Messageboxbody = "Folder created and $AccessRights permissions set."
-                    Display-Info 
+                    Display-Success
                     }
                     Else {
-                        $MessageboxTitle = "ERROR"
                         $Messageboxbody = "Operation failed. $AccessRights permissions could not be set."
                         Display-Error
                         }
                 } Else {
 
-                    $MessageboxTitle = "WARNING"
+                    $MessageboxTitle = "QUESTION"
                     $Messageboxbody = "Folder path does not exist. Do you want to create folder? `n$path"
-                    $Global:LogStatus = "WARNING"
                     $Global:LogMSG = "Folder does not exist: $Path"
-                    Update-Logfile $Global:LogStatus $Global:LogMSG
+                    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 
-                    $msgBoxInput =  [System.Windows.MessageBox]::Show($Messageboxbody,$MessageboxTitle,'YesNo','Warning')
+                    $msgBoxInput =  [System.Windows.MessageBox]::Show($Messageboxbody,$MessageboxTitle,'YesNo','Question')
 
                     switch  ($msgBoxInput) {
                         'Yes' {
-                            $Global:LogStatus = "INFO"
                             $Global:LogMSG = "Attempting to create folder..."
-                            Update-Logfile $Global:LogStatus $Global:LogMSG
+                            Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
                             # Create the new folder
                             New-Item $Path -type directory
                             If (Test-Path $Path){
-                                $Global:LogStatus = "SUCCESS"
                                 $Global:LogMSG = "Folder created."
-                                Update-Logfile $Global:LogStatus $Global:LogMSG
+                                Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
                                 # Set the folder permissions
-                                $Global:LogStatus = "INFO"
                                 $Global:LogMSG = "Setting $AccessRights access rights on folder."
-                                Update-Logfile $Global:LogStatus $Global:LogMSG
+                                Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
                                 Add-NTFSAccess -Path $Path -Account $Account -AccessRights $AccessRights
 
                                 # Confirm the permissions are set
                                 $permission = (Get-Acl $Path).Access | ?{$_.IdentityReference -match $Account} | Select IdentityReference,FileSystemRights
                                 If ($permission){
-                                    $MessageboxTitle = "SUCCESS"
                                     $Messageboxbody = "Folder created and $AccessRights permissions set."
-                                    Display-Info 
+                                    Display-Success 
                                     }
                                     Else {
-                                        $MessageboxTitle = "ERROR"
                                         $Messageboxbody = "Operation failed. Folder was created but $AccessRights permissions could not be set."
                                         Display-Error
                                         }
                                 } Else {
-                                $MessageboxTitle = "ERROR"
                                 $Messageboxbody = "Operation failed. Aborting!!"
                                 Display-Error
                                 }
                             }
 
                         'No' {
-                            $MessageboxTitle = "INFO"
                             $Messageboxbody = "Operation Cancelled"
                             Display-Info
                             }
                         }
                     }
             } Else {
-                $MessageboxTitle = "ERROR"
                 $Messageboxbody = "Group name $Account cannot be validated in AD. Plase enter a valid group name to continue"
                 Display-Error
                 }
@@ -823,6 +825,7 @@ function Reset-ADCmdsForm{
 }
 
 function Create-SingleADUser{
+    $Global:LogModule = "SingleADNU"
     Reset-UserInputVars
 
     # Collect user input into variables and clean the data
@@ -917,9 +920,8 @@ function Create-SingleADUser{
 ### This section creates the user account per the details entered by the technician. ###    
 
     # Create User account
-    $Global:LogStatus = "INFO"
     $Global:LogMSG = "Attempting to create AD account for $logonname"
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
     New-ADUser -SamAccountName $logonname -AccountExpirationDate $ExpireDate -userPrincipalName $userPrincipalName -GivenName $firstname -Surname $lastname -initials $initial -displayName $displayname -department $dept -Name $displayname -Path $SiteOU -Description $job -Title $job -enable $True -AccountPassword (ConvertTo-SecureString -AsPlainText 'TempPwd2017' -Force) -homeDirectory $homeDirectory -homeDrive $homeDrive -company $company -city $L_city -office $physicalDeliveryOfficeName -postalCode $postalCode -scriptPath $scriptPath -state $st -streetAddress $streetAddress -manager $manager
     Set-ADUser –Identity $logonname –ChangePasswordAtLogon $true
 
@@ -933,9 +935,8 @@ function Create-SingleADUser{
             }  
         
         # Display success message
-        $MessageboxTitle = "SUCCESS"
         $Messageboxbody = "AD account for $logonname has been created successfully!"
-        Display-Info 
+        Display-Success
 
         # Reset form for next use
         Reset-ADNUErrors
@@ -945,7 +946,6 @@ function Create-SingleADUser{
         } ELSE 
               {
                # An error has occured.
-               $MessageboxTitle = "ERROR"
                $Messageboxbody = "Failed to create user account $logonname. Job aborted!"
                Display-Error 
                }
@@ -958,125 +958,133 @@ function Create-MultiADUser{
 
     foreach ($newUserdata in $multiuserCSV){
 
-        ## Validate the CSV data and export errors to a notepad for analysis.
-    
-        # Reset any highlighted errors from a previous validation
+        ## Validate the CSV data and export errors to a log for analysis.
         Reset-ADNUErrors
+        $Global:LogModule = "MultiADNUValidate"
+        $LogMsg = @()
+        $LogErrors = @()
     
         #Collect user input into variables and clean the data
-        $Site = $WPFcombo_ADNU_Site.SelectedValue
+        $Site = $newUserdata.Site
+        If (($site -ne "") -and ($site -ne $null))
+            {
+            $site = $site.Trim()
+            }
 
-        $firstname = $WPFtxtbox_ADNU_firstname.Text
+        $firstname = $newUserdata.FirstName
         If (($firstname -ne "") -and ($firstname -ne $null))
             {
             $firstname = $firstname.Replace(' ','')
             $firstname = $firstname.Replace("'",'')
             }
 
-        $lastname = $WPFtxtbox_ADNU_lastname.Text
+        $lastname = $newUserdata.LastName
         If (($lastname -ne "") -and ($lastname -ne $null))
             {
             $lastname = $lastname.Replace(' ','')
             $lastname = $lastname.Replace("'",'')
             }
 
-        $initial = $WPFtxtbox_ADNU_initial.Text
+        $initial = $newUserdata.Initial
         If (($initial -ne "") -and ($initial -ne $null))
             {
             $initial = $initial.Replace(' ','')
             }
 
-        $logonname = $WPFtxtbox_ADNU_logonname.Text
+        $logonname = $newUserdata.LogonName
         If (($logonname -ne "") -and ($logonname -ne $null))
             {
             $logonname = $logonname.Replace(' ','')
             }
 
-        $displayname = $WPFtxtbox_ADNU_displayname.Text
+        $displayname = $newUserdata.DisplayName
         If (($displayname -ne "") -and ($displayname -ne $null))
             {
             $displayname = $displayname.Trim()
             }
 
-        $manager = $WPFtxtbox_ADNU_manager.Text
+        $manager = $newUserdata.Manager
         If (($manager -ne "") -and ($manager -ne $null))
             {
             $manager = $manager.Trim()
             $manager = $manager.Replace(' ','.')
             }
 
-        $job = $WPFtxtbox_ADNU_title.Text
+        $job = $newUserdata.JobTitle
         If(($job -ne "") -and ($job -ne $null))
             {
             $job = $job.Trim()
             }
 
-        $dept = $WPFtxtbox_ADNU_dept.Text
+        $dept = $newUserdata.Department
         If (($dept -ne "") -and ($dept -ne $null))
             {
             $dept = $dept.Trim()
             }
-
-        If ($WPFchkbox_ADNU_Site1.IsChecked -eq $true)
+        
+        $Site1App = $newUserdata.OMA_Vault
+        If (($Site1App -eq "Y") -or ($Site1App -eq "Yes"))
             {
             $omavault = $true
             }
 
-        If ($WPFchkbox_ADNU_Site2.IsChecked -eq $true)
+        $Site2App = $newUserdata.DGN_Vault
+        If (($Site2App -eq "Y") -or ($Site2App -eq "Yes"))
             {
             $dgnvault = $true
             }
 
-        If ($WPFchkbox_ADNU_temp.IsChecked -eq $true)
+        $tempuser = $newUserdata.Temp_User
+        If (($tempuser -eq "Y") -or ($tempuser -eq "Yes"))
             {
             $tempuser = $true
             }
 
         # If Temp User is checked but no expiry date entered, error.
-        If (($WPFchkbox_ADNU_temp.IsChecked -eq $true) -and ($WPFdatepkr_ADNU_expiry.SelectedDate -eq $null))
+        If (($tempuser -eq $true) -and ($newUserdata.ExpiryDate -eq $null))
             {
             $errorcount++
-            $WPFtxtblock_ADNU_errorexpiry.Visibility = "Visible"
-            }
+            $LogErrors += "Temp User is checked but no expiry date entered; "
+            } ELSE {
+                If (($tempuser -eq $true) -and ($newUserdata.ExpiryDate -ne $null))
+                    {
+                    $newDateTime = [DateTime]::Parse($WPFdatepkr_ADNU_expiry.Text) 
+                    $ExpireDate = $newDateTime.AddDays(1)
+                    }  
+                }    
 
-        If ($tempuser -eq $true)
-            {
-            $newDateTime = [DateTime]::Parse($WPFdatepkr_ADNU_expiry.Text) 
-            $ExpireDate = $newDateTime.AddDays(1)
-            }      
-
-        # If the site has not been selected from the combobox, error.
+        # If the site has not been provided.
         If (($Site -eq "") -or ($site -eq $null))
             {
             $errorcount++
-            $WPFtxtblock_ADNU_errorsite.Visibility = "Visible"
+            $LogErrors += "Site code not selected; "
             }
 
         # If the firstname is left blank, error
         If (($firstname -eq "") -or ($firstname -eq $null))
             {
             $errorcount++
-            $WPFtxtblock_ADNU_errorfirst.Visibility = "Visible"
+            $LogErrors += "First name is blank; "
             }
 
         # If the lastname is left blank, error
         If (($lastname -eq "") -or ($lastname -eq $null))
             {
             $errorcount++
-            $WPFtxtblock_ADNU_errorlast.Visibility = "Visible"
+            $LogErrors += "Last name is blank; "
             }
         
         # If logon name is blank, error
         If (($logonname -eq "") -or ($logonname -eq $null))
             {
             $errorcount++
-            $WPFtxtblock_ADNU_errorlogon.Visibility = "Visible"
+            $LogErrors += "Logon name is blank; "
             } ELSE {
                     # Checks that the logon name is unique
                     If (dsquery user -samid $logonname)
                         {
                         $errorcount++
-                        $WPFtxtblock_ADNU_errorlogonunique.Visibility = "Visible"
+                        $LogErrors += "$logonname is not unique; "
                         }
                     }
 
@@ -1084,71 +1092,98 @@ function Create-MultiADUser{
         If (($displayname -eq "") -or ($displayname -eq $null))
             {
             $errorcount++
-            $WPFtxtblock_ADNU_errordisp.Visibility = "Visible"
+            $LogErrors += "Display name is blank; "
             }
 
         # If manager name is blank, error
         If (($manager -eq "") -or ($manager -eq $null))
             {
             $errorcount++
-            $WPFtxtblock_ADNU_errormgr.Visibility = "Visible"
+            $LogErrors += "Manager name is blank; "
             } ELSE {
                     # Check the inputted manager exists in AD
                     If (!(dsquery user -samid $manager))
                         {
                         $errorcount++
-                        $WPFtxtblock_ADNU_errormgrunique.Visibility = "Visible"
+                        $LogErrors += "Entered manager does not exist in AD; "
                         }
                     }
         # If Job Title is blank, error
             If (($job -eq "") -or ($job -eq $null))
             {
             $errorcount++
-            $WPFtxtblock_ADNU_errortitle.Visibility = "Visible"
+            $LogErrors += "Job title is blank; "
             }
         # If Dept is blank, error.
             If (($dept -eq "") -or ($dept -eq $null))
             {
             $errorcount++
-            $WPFtxtblock_ADNU_errordept.Visibility = "Visible"
+            $LogErrors += "Department is blank"
             }
 
         ## If errors are present, highlight issues.
         If ($errorcount -ne 0)
             {
-            $ButtonType = [System.Windows.MessageBoxButton]::OK
-            $MessageboxTitle = "Check errors"
-            $Messageboxbody = "There are $errorcount error(s). Please ensure to all reqired fields marked with excalamation marks ! are completed and action any other errors as displayed."
-            $MessageIcon = [System.Windows.MessageBoxImage]::Warning
-            [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
+            $LogMSG += "There are $errorcount error(s). Cannot create user $logonname`n"
+            $LogMSG += $LogErrors
+            $LogStatus = "WARNING"
+            Update-LogFile $LogStatus $LogModule $LogMSG
             }
 
-        ## If no errors, disable all fields so data cannot be changed. Then, enable the Edit (in case the user does want to edit the info) and Create User buttons.
+        ## If no errors, create user.
         If ($errorcount -eq 0)
             {
-            $WPFcombo_ADNU_Site.IsEnabled = $false
-            $WPFtxtbox_ADNU_firstname.IsEnabled = $false
-            $WPFtxtbox_ADNU_lastname.IsEnabled = $false
-            $WPFtxtbox_ADNU_initial.IsEnabled = $false
-            $WPFchkbox_ADNU_Site1.IsEnabled = $false
-            $WPFchkbox_ADNU_Site2.IsEnabled = $false
-            $WPFchkbox_ADNU_temp.IsEnabled = $false
-            $WPFdatepkr_ADNU_expiry.IsEnabled = $false
-            $WPFtxtbox_ADNU_logonname.IsEnabled = $false
-            $WPFtxtbox_ADNU_displayname.IsEnabled = $false
-            $WPFtxtbox_ADNU_manager.IsEnabled = $false
-            $WPFtxtbox_ADNU_title.IsEnabled = $false
-            $WPFtxtbox_ADNU_dept.IsEnabled = $false
-            $WPFbtn_ADNU_validate.IsEnabled = $false
-            $WPFbtn_ADNU_edit.IsEnabled = $true
-            $WPFbtn_ADNU_Create.IsEnabled = $true
-            $ButtonType = [System.Windows.MessageBoxButton]::OK
-            $MessageboxTitle = "Validate user info"
-            $Messageboxbody = "User info has been validated. To make changes, click Edit. To proceed, click Create User."
-            $MessageIcon = [System.Windows.MessageBoxImage]::Information
-            [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
-            }
 
+
+            ### Set default attributes and pulse vaults if applicable ###
+
+            Get-DefaultAtts
+
+    
+            ## Add the Pulse vault security groups if Pulse vaults checked. (OMA vault is added by default to OMA users so no need to add twice)
+            IF (($omavault -eq $true) -and ($Site -ne "OMA"))
+                {
+                $Groups = "$Groups" + "," + "OMA-Data_PDM_A"
+                }                    
+    
+            IF ($dgnvault -eq $true)
+                {   
+                $Groups = "$Groups" + "," + "DGNApp_Pulse"
+                }   
+
+
+        ### This section creates the user account per the details in the CSV. ###    
+
+            # Create User account
+            $logStatus = "INFO"
+            $Global:LogMSG = "Attempting to create AD account for $logonname"
+            Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
+            New-ADUser -SamAccountName $logonname -AccountExpirationDate $ExpireDate -userPrincipalName $userPrincipalName -GivenName $firstname -Surname $lastname -initials $initial -displayName $displayname -department $dept -Name $displayname -Path $SiteOU -Description $job -Title $job -enable $True -AccountPassword (ConvertTo-SecureString -AsPlainText 'TempPwd2017' -Force) -homeDirectory $homeDirectory -homeDrive $homeDrive -company $company -city $L_city -office $physicalDeliveryOfficeName -postalCode $postalCode -scriptPath $scriptPath -state $st -streetAddress $streetAddress -manager $manager
+            Set-ADUser –Identity $logonname –ChangePasswordAtLogon $true
+
+            # Check that user account was created successfully before adding to groups
+            IF (dsquery user -samid $logonname)
+                {
+                $Groups = $Groups.split(",")
+                foreach ($Group in $Groups)
+                    {
+                    Add-ADGroupMember -Identity $Group $logonname
+                    }  
+        
+                # Display success message
+                $logMSG = "AD account for $logonname has been created successfully!"
+                $LogStatus = "SUCCESS"
+                Update-LogFile $LogStatus $LogModule $LogMSG
+                } ELSE 
+                      {
+                       # An error has occured.
+                       $LogMSG = "Failed to create user account $logonname. Job aborted!"
+                       $LogStatus = "ERROR"
+                        Update-LogFile $LogStatus $LogModule $LogMSG
+                       }
+
+
+            }
 
         } # end foreach NewUserData in multiuserCSV
 }
@@ -1169,10 +1204,10 @@ If (($prerun_A1 -ne $null) -and ($prerun_A1 -ne ""))
     Start-Process $cmd_A1
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $WPFbtn_A1.Content + " started."
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 })
  
- ### Button A2 ###
+### Button A2 ###
 $WPFbtn_A2.Add_Click({ 
 If (($prerun_A2 -ne $null) -and ($prerun_A2 -ne ""))
     {
@@ -1181,7 +1216,7 @@ If (($prerun_A2 -ne $null) -and ($prerun_A2 -ne ""))
     Start-Process $cmd_A2
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $WPFbtn_A2.Content + " started."
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 })
 
 ### Button A3 ###
@@ -1193,7 +1228,7 @@ If (($prerun_A3 -ne $null) -and ($prerun_A3 -ne ""))
     Start-Process $cmd_A3
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $WPFbtn_A3.Content + " started."
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 })
 
 ### Button A4 ###
@@ -1205,7 +1240,7 @@ If (($prerun_A4 -ne $null) -and ($prerun_A4 -ne ""))
     Start-Process $cmd_A4
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $WPFbtn_A4.Content + " started."
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 }) 
 
 ### Button A5 ###
@@ -1217,7 +1252,7 @@ If (($prerun_A5 -ne $null) -and ($prerun_A5 -ne ""))
     Start-Process $cmd_A5
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $WPFbtn_A5.Content + " started."
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 })
 
 ### Button A5 ###
@@ -1229,7 +1264,7 @@ If (($prerun_A6 -ne $null) -and ($prerun_A6 -ne ""))
     Start-Process $cmd_A6
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $WPFbtn_A6.Content + " started."
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 })
 
 ### Button B1 ###
@@ -1241,7 +1276,7 @@ If (($prerun_B1 -ne $null) -and ($prerun_B1 -ne ""))
     Start-Process $cmd_B1
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $WPFbtn_B1.Content + " started."
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 }) 
 
 ### Button B2 ###
@@ -1253,7 +1288,7 @@ If (($prerun_B2 -ne $null) -and ($prerun_B2 -ne ""))
     Start-Process $cmd_B2
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $WPFbtn_B2.Content + " started."
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 }) 
 
 ### Button B3 ###
@@ -1265,7 +1300,7 @@ If (($prerun_B3 -ne $null) -and ($prerun_B3 -ne ""))
     Start-Process $cmd_B3
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $WPFbtn_B3.Content + " started."
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 })
 
 ### Button B4 ###
@@ -1277,7 +1312,7 @@ If (($prerun_B4 -ne $null) -and ($prerun_B4 -ne ""))
     Start-Process $cmd_B4
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $WPFbtn_B4.Content + " started."
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 }) 
 
 ### Button B5 ###
@@ -1289,7 +1324,7 @@ If (($prerun_B5 -ne $null) -and ($prerun_B5 -ne ""))
     Start-Process $cmd_B5
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $WPFbtn_B5.Content + " started."
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 })
 
 ### Button B6 ###
@@ -1301,7 +1336,7 @@ If (($prerun_B6 -ne $null) -and ($prerun_B6 -ne ""))
     Start-Process $cmd_B6
     $Global:LogStatus = "INFO"
     $Global:LogMSG = $WPFbtn_B6.Content + " started."
-    Update-Logfile $Global:LogStatus $Global:LogMSG
+    Update-Logfile $Global:LogStatus $Global:LogModule $Global:LogMSG
 })
 
 #======================#
@@ -1506,7 +1541,8 @@ $WPFtxtbox_ADCmds_computername.Add_TextChanged({
         $WPFbtn_loggedOn.IsEnabled = $false
         $WPFbtn_lastBoot.IsEnabled = $false
         $WPFbtn_discomputeracc.IsEnabled = $false
-        $WPFbtn_encomputeracc.IsEnabled = $false        
+        $WPFbtn_encomputeracc.IsEnabled = $false
+        $WPFbtn_nextavailacc.IsEnabled = $false        
         }
 })
 
@@ -1567,11 +1603,11 @@ $WPFtxtbox_ADCmds_dirpath.Add_TextChanged({
 
 ### Unlock user account ###
 $WPFbtn_unlock.Add_Click({
+    $Global:LogModule = "UnlockAccount"
     $username = $WPFtxtbox_ADCmds_username.Text
 
     If (($Username -eq "") -or ($Username -eq " ") -or ($Username -eq $null))
         {
-        $MessageboxTitle = "Warning"
         $Messageboxbody = "Username cannot be blank."
         Display-Warning
         } 
@@ -1589,15 +1625,13 @@ $WPFbtn_unlock.Add_Click({
                                     If ((Get-ADUser  $username -Properties LockedOut | Select-Object LockedOut) -eq $false)
                                     {
                                     $attempt = 5
-                                    $MessageboxTitle = "SUCCESS"
                                     $Messageboxbody = "$Username" + "'s account has been unlocked!"
-                                    Display-Info
+                                    Display-Success
                                     }
                                     Else {
                                         $attempt = $attempt++
                                         If ($attempt -ge 4)
                                             {
-                                            $MessageboxTitle = "ERROR"
                                             $Messageboxbody = "AD account $Username cannot be unlocked!"
                                             Display-Error
                                             }
@@ -1605,7 +1639,6 @@ $WPFbtn_unlock.Add_Click({
                                     }
                             Else {
                                 $attempt = 5
-                                $MessageboxTitle = "INFO"
                                 $Messageboxbody = "$Username" + "'s account is not locked. No action taken!"
                                 Display-Info
                                 }
@@ -1614,7 +1647,6 @@ $WPFbtn_unlock.Add_Click({
                                 
                         } ELSE
                         {
-                        $MessageboxTitle = "ERROR"
                         $Messageboxbody = "$Username does not exist in AD. Please enter a valid username"
                         Display-Error
                         }
@@ -1626,11 +1658,11 @@ $WPFbtn_unlock.Add_Click({
 
 ### Password reset ###
 $WPFbtn_resetPWD.Add_Click({
+    $Global:LogModule = "PasswordReset"
     $username = $WPFtxtbox_ADCmds_username.Text
 
     If (($Username -eq "") -or ($Username -eq " ") -or ($Username -eq $null))
         {
-        $MessageboxTitle = "WARNING"
         $Messageboxbody = "Username cannot be blank. Please enter a valid username"
         Display-WARNING
         } 
@@ -1645,12 +1677,10 @@ $WPFbtn_resetPWD.Add_Click({
                         Set-ADAccountPassword -Reset -NewPassword $SecPaswd –Identity $username
                         Unlock-ADAccount -identity $username
                         Set-ADUser –Identity $username –ChangePasswordAtLogon $true
-                        $MessageboxTitle = "SUCCESS"
                         $Messageboxbody = "$Username" + " password reset"
-                        Display-Info
+                        Display-Success
                         } ELSE
                         {
-                        $MessageboxTitle = "ERROR"
                         $Messageboxbody = "$Username does not exist in AD. Please enter a valid username"
                         Display-Error
                         }
@@ -1662,13 +1692,13 @@ $WPFbtn_resetPWD.Add_Click({
 
 ### Export user's group membership to CSV ###
 $WPFbtn_exportGroups.Add_Click({
+    $Global:LogModule = "ExportUserMembership"
     $Username = $WPFtxtbox_ADCmds_username.Text
     $username = $username.trim()
     $username =$username.replace(' ','.')
 
     If (($Username -eq "") -or ($Username -eq " ") -or ($Username -eq $null))
         {
-        $MessageboxTitle = "WARNING"
         $Messageboxbody = "Cannot export user group membership to CSV. Username cannot be blank. Please enter a valid username"
         Display-WARNING
         }
@@ -1676,13 +1706,11 @@ $WPFbtn_exportGroups.Add_Click({
                 IF (dsquery user -samid $username)
                     {
                     Get-ADPrincipalGroupMembership $Username | select name | Export-csv -path "C:\Member of Groups - $Username.csv" -NoTypeInformation
-                    $MessageboxTitle = "SUCCESS"
                     $Messageboxbody = "Group membership for $username has been exported to C:\Member of Groups - $Username.csv"
-                    Display-Info
+                    Display-Success
 
                     } ELSE
                     {
-                    $MessageboxTitle = "WARNING"
                     $Messageboxbody = "Cannot export user group membership to CSV. $Username does not exist in AD. Please enter a valid username"
                     Display-Warning
                     }
@@ -1693,7 +1721,7 @@ $WPFbtn_exportGroups.Add_Click({
 
 ### Add user to local admin group of remote machine ###
 $WPFbtn_addlocalAdmin.Add_Click({
-
+    $LogModule = "AddLocalAdmin"
     $ComputerName = $WPFtxtbox_ADCmds_computername.Text
     $UserName = $WPFtxtbox_ADCmds_username.text
     $username = $username.trim()
@@ -1702,7 +1730,6 @@ $WPFbtn_addlocalAdmin.Add_Click({
     #Check the machine is online.
     IF (-not (Test-Connection -comp $computername -quiet))
         {
-        $MessageboxTitle = "ERROR"
         $Messageboxbody = "Unable to add $Username to local admin group. $computername is offline or unreachable"
         Display-Error
         }ELSE
@@ -1716,19 +1743,16 @@ $WPFbtn_addlocalAdmin.Add_Click({
                     $AdminGroup = [ADSI]"WinNT://$ComputerName/Administrators,group"
                     $User = [ADSI]"WinNT://$env:USERDOMAIN/$UserName,user"
                     $AdminGroup.add($User.Path)
-                    $MessageboxTitle = "SUCCESS"
                     $Messageboxbody = "$UserName added to local Administrators group on $computername"
-                    Display-Info
+                    Display-Success
                     }ELSE{
                         # Computername not valid
-                        $MessageboxTitle = "ERROR"
                         $Messageboxbody = "Unable to add $Username to local admin group. $computername does not exist in AD. Please enter a valid computer name"
                         Display-Error
                         }
                 } ELSE 
                         {
                         # Username not valid
-                        $MessageboxTitle = "ERROR"
                         $Messageboxbody = "$username does not exist in AD. Please enter a valid user name to add to local admin group on $computername"
                         Display-Error
                         }
@@ -1739,6 +1763,7 @@ $WPFbtn_addlocalAdmin.Add_Click({
 
 ### Remove user from local admin group of remote machine ###
 $WPFbtn_remlocalAdmin.Add_Click({
+    $Global:LogModule = "RemoveLocalAdmin"
     $ComputerName = $WPFtxtbox_ADCmds_computername.Text
     $UserName = $WPFtxtbox_ADCmds_username.text
     $username = $username.trim()
@@ -1746,7 +1771,6 @@ $WPFbtn_remlocalAdmin.Add_Click({
     #Check the machine is online.
     IF (-not (Test-Connection -comp $computername -quiet))
         {
-        $MessageboxTitle = "ERROR"
         $Messageboxbody = "Unable to remove $Username from local admin group. $computername is offline or unreachable"
         Display-Error
         }ELSE{
@@ -1759,18 +1783,15 @@ $WPFbtn_remlocalAdmin.Add_Click({
                     $AdminGroup = [ADSI]"WinNT://$ComputerName/Administrators,group"
                     $User = [ADSI]"WinNT://$env:USERDOMAIN/$UserName,user"
                     $AdminGroup.remove($User.Path)
-                    $MessageboxTitle = "SUCCESS"
                     $Messageboxbody = "$UserName removed from local Administrators group on $computername"
-                    Display-Info
+                    Display-Success
                     }ELSE{
                         # Computername not valid
-                        $MessageboxTitle = "ERROR"
                         $Messageboxbody = "Unable to remove $Username from local admin group. $computername does not exist in AD. Please enter a valid computer name"
                         Display-Error
                         }
                 } ELSE {
                         # Username not valid
-                        $MessageboxTitle = "ERROR"
                         $Messageboxbody = "$username does not exist in AD. Please enter a valid user name to be removed from local admin group on $computername"
                         Display-Error
                         }
@@ -1781,6 +1802,7 @@ $WPFbtn_remlocalAdmin.Add_Click({
 
 ### Add user to group ###
 $WPFbtn_addUsertoGroup.Add_Click({
+    $Global:LogModule = "AddUserToGrp"
     $logonname = $WPFtxtbox_ADCmds_username.text
     $logonname = $logonname.trim()
     $logonname = $logonname.replace(' ','.')
@@ -1797,13 +1819,11 @@ $WPFbtn_addUsertoGroup.Add_Click({
             }  
         
         # Display success message
-        $MessageboxTitle = "SUCCESS"
         $Messageboxbody = "All tasks have been completed successfully!"
-        Display-Info
+        Display-Success
         } ELSE 
                   {
                    # An error has occured.
-                   $MessageboxTitle = "ERROR"
                    $Messageboxbody = "Failed to add $username to one or more group(s). Aborting job!"
                    Display-Error 
                    }
@@ -1813,6 +1833,7 @@ $WPFbtn_addUsertoGroup.Add_Click({
 
 ### Remove user from group ###
 $WPFbtn_rmvUserfromGroup.Add_Click({
+    $Global:LogModule = "RemoveUserFromGrp"
     $logonname = $WPFtxtbox_ADCmds_username.text
     $logonname = $logonname.trim()
     $logonname = $logonname.replace(' ','.')
@@ -1829,13 +1850,11 @@ $WPFbtn_rmvUserfromGroup.Add_Click({
             }  
         
         # Display success message
-        $MessageboxTitle = "SUCCESS"
         $Messageboxbody = "$logonname removed from $Group"
-        Display-Info
+        Display-Success
         } ELSE 
                   {
                    # An error has occured.
-                   $MessageboxTitle = "ERROR"
                    $Messageboxbody = "Failed to remove $username from one or more group(s). Aborting job!"
                    Display-Error 
                    }
@@ -1847,12 +1866,12 @@ $WPFbtn_rmvUserfromGroup.Add_Click({
 
 ### Who is logged onto computer ###
 $WPFbtn_loggedOn.Add_Click({
+    $Global:LogModule = "LoggedOnUser"
     $computername = $WPFtxtbox_ADCmds_computername.Text
     $computername = $computername.trim()
     
     If (($computername -eq "") -or ($computername -eq " ") -or ($computername -eq $null))
         {
-        $MessageboxTitle = "WARNING"
         $Messageboxbody = "Cannot check logged on user as Computer name cannot be blank."
         Display-WARNING
         }
@@ -1860,7 +1879,6 @@ $WPFbtn_loggedOn.Add_Click({
              #Check the machine is online.
              IF (-not (Test-Connection -comp $computername -quiet))
                 {
-                $MessageboxTitle = "ERROR"
                 $Messageboxbody = "Cannot check logged on user as $computername is offline or unreachable"
                 Display-Error
                 }ELSE{
@@ -1870,11 +1888,9 @@ $WPFbtn_loggedOn.Add_Click({
                         $output = $Output.replace(' ','')
                         $output = $Output.replace('UserName','')
                         $output = $Output.trim()
-                        $MessageboxTitle = "SUCCESS"
                         $Messageboxbody = "User logged onto $computername is: `n" + $output
-                        Display-Info
+                        Display-Success
                         }ELSE{
-                            $MessageboxTitle = "ERROR"
                             $Messageboxbody = "Cannot check logged on user as $computername does not exist in AD."
                             Display-Error
                             }
@@ -1887,19 +1903,18 @@ $WPFbtn_loggedOn.Add_Click({
 
 ### Last boot of computer ###
 $WPFbtn_lastBoot.Add_Click({
+    $Global:LogModule = "LastBoot"
     $computername = $WPFtxtbox_ADCmds_computername.Text
     $computername = $computername.trim()
     
     If (($computername -eq "") -or ($computername -eq " ") -or ($computername -eq $null))
         {
-        $MessageboxTitle = "WARNING"
         $Messageboxbody = "Cannot check last boot as Computer name is blank."
         Display-Warning
         }ELSE{
              #Check the machine is online.
              IF (-not (Test-Connection -comp $computername -quiet))
                 {
-                $MessageboxTitle = "ERROR"
                 $Messageboxbody = "Cannot check last boot as $computername is offline or unreachable"
                 Display-Error
                 }ELSE{
@@ -1907,14 +1922,11 @@ $WPFbtn_lastBoot.Add_Click({
                         {
                         $Booted = Get-WmiObject -Class Win32_OperatingSystem -Computer $Computername
                         $Output = $Booted.ConvertToDateTime($Booted.LastBootUpTime) | Out-String
-
-                        $MessageboxTitle = "SUCCESS"
                         $Messageboxbody = "Last boot of $computername is: $output"
-                        Display-Info
+                        Display-Success
 
                         }ELSE
                             {
-                            $MessageboxTitle = "ERROR: Invalid computer name"
                             $Messageboxbody = "Cannot check last boot as $computername does not exist in AD."
                             Display-Error
                             }
@@ -1927,6 +1939,7 @@ $WPFbtn_lastBoot.Add_Click({
 
 ### Disable computer account ###
 $WPFbtn_discomputeracc.Add_Click({
+    $Global:LogModule = "DisableComputer" 
     $computername = $WPFtxtbox_ADCmds_computername.Text
     $computername = $computername.trim()
     $samaccountname = $Computername + "$"
@@ -1934,18 +1947,17 @@ $WPFbtn_discomputeracc.Add_Click({
     Disable-ADAccount -Identity $samaccountname
     Reset-ADCmdsForm
     Get-module | Remove-Module
-    $MessageboxTitle = "SUCCESS" 
     $Messageboxbody = "$Computername disabled"
-    Display-Info
+    Display-Success
     } Else {
-        $MessageboxTitle = "Computer account not detected" 
         $Messageboxbody = "$Computername computer account doesn't exist in AD"
-        Display-Warning
+        Display-Error
         }
 })
 
 ### Enable computer account ###
 $WPFbtn_encomputeracc.Add_Click({
+    $Global:LogModule = "EnableComputer"
     $computername = $WPFtxtbox_ADCmds_computername.Text
     $computername = $computername.trim()
     $samaccountname = $Computername + "$"
@@ -1953,19 +1965,17 @@ $WPFbtn_encomputeracc.Add_Click({
     Enable-ADAccount -Identity $samaccountname
     Reset-ADCmdsForm
     Get-module | Remove-Module
-    $MessageboxTitle = "Computer account enabled" 
     $Messageboxbody = "$Computername enabled"
-    Display-Info
+    Display-Success
     } Else {
-        $MessageboxTitle = "ERROR" 
         $Messageboxbody = "$Computername computer account doesn't exist in AD"
-        Display-Warning
+        Display-Error
         }
 })
 
 ### Check for next available unused computer account before create computer account ###
 $WPFbtn_nextavailacc.Add_Click({
-
+    
     $Site = $WPFcombobox_ADCmds_site.SelectedValue
     $KitType = $WPFcombobox_kittype.SelectedValue
     $Global:SiteDefaultAtts = $Global:AllDefaultAtts | Where-Object{$_.SiteCode -eq $Site}
@@ -2030,6 +2040,7 @@ $WPFbtn_nextavailacc.Add_Click({
 ### Create computer account ###
 # When btn_computeracc is clicked, validate data and create the computer account
 $WPFbtn_computeracc.Add_Click({
+   $Global:LogModule = "CreateComputerAcc"
    $computername = $WPFtxtbox_ADCmds_computername.Text
    $Site = $WPFcombobox_ADCmds_site.SelectedValue
    $KitType = $WPFcombobox_kittype.SelectedValue
@@ -2037,21 +2048,18 @@ $WPFbtn_computeracc.Add_Click({
     
     If ($computername -eq "")
         {
-        $MessageboxTitle = "WARNING"
         $Messageboxbody = "Cannot create computer account as Computer name cannot be blank."
         Display-Warning
         }
         ELSE {
             If (($kittype -ne "Notebook") -and ($kittype -ne "Workstation"))
                 {
-                $MessageboxTitle = "WARNING"
                 $Messageboxbody = "Cannot create computer account as Type of kit cannot be blank."
                 Display-Warning
                 }
                 ELSE {
                      If ($Site -notin $Global:AllDefaultAtts.SiteCode)
                         {
-                        $MessageboxTitle = "WARNING"
                         $Messageboxbody = "Cannot create computer account as Site code cannot be blank."
                         Display-Warning
                         }
@@ -2071,18 +2079,15 @@ $WPFbtn_computeracc.Add_Click({
                             $computersam = "$computername" + "$"
                             IF (dsquery computer -samid $computersam)
                                 {
-                                $MessageboxTitle = "ERROR"
                                 $Messageboxbody = "Requested computer name already exists in AD. Please enter a unique computer name"
                                 Display-Error
                                 } Else {
                                     New-ADComputer -Name $computername -SAMAccountName $computersam -Path $OU
                                     IF (dsquery computer -samid $computersam)
                                         {
-                                        $MessageboxTitle = "SUCCESS"
                                         $Messageboxbody = "$computername computer account created!"
-                                        Display-Info
+                                        Display-Success
                                         } Else {
-                                        $MessageboxTitle = "ERROR"
                                         $Messageboxbody = "An error has occured. $computername computer account not created. Aborting!"
                                         Display-Error
                                         }
@@ -2106,12 +2111,12 @@ $WPFbtn_computeracc.Add_Click({
 
 ### Export the members of a group ###
 $WPFbtn_exportMembers.Add_Click({
+    $Global:LogModule = "ExportGrpMembers"
     $Group = $WPFtxtbox_ADCmds_Group.Text
     $Group = $Group.trim()
     
     If ($Group -eq "")
         {
-        $MessageboxTitle = "WARNING"
         $Messageboxbody = "Cannot export members of group as Group name cannot be blank."
         Display-Warning
         }
@@ -2119,12 +2124,10 @@ $WPFbtn_exportMembers.Add_Click({
             IF (dsquery group -samid $Group)
                 {
                 Get-ADGroupMember -identity $Group | select name | Export-csv -path "C:\Members of group - $Group.csv" -NoTypeInformation
-                $MessageboxTitle = "SUCCESS"
                 $Messageboxbody = "Group membership of $group has been exported to C:\Members of group - $Group.csv"
-                Display-Info
+                Display-Success
                 } ELSE
                     {
-                    $MessageboxTitle = "ERROR"
                     $Messageboxbody = "Cannot export members of group as $Group does not exist in AD."
                     Display-Error
                     }
@@ -2135,6 +2138,7 @@ $WPFbtn_exportMembers.Add_Click({
 
 ### Create new Group ###
 $WPFbtn_createGroup.Add_Click({
+    $Global:LogModule = "NewGroup"
     $Account = $WPFtxtbox_ADCmds_group.Text
     $Account = $Account.Trim()
     $Account = $Account.Replace(' ','_')
@@ -2144,7 +2148,6 @@ $WPFbtn_createGroup.Add_Click({
     # Check for blanks
     If (($Account -eq " ") -or ($account -eq "") -or ($account -eq $null))
         {
-        $MessageboxTitle = "WARNING"
         $Messageboxbody = "Cannot create new group as Group name is blank."
         Display-Warning
         } ELSE {
@@ -2159,13 +2162,11 @@ $WPFbtn_createGroup.Add_Click({
                         New-ADGroup -name $Account -GroupScope Universal -GroupCategory Security -DisplayName $Account -Path $GrpPath
                         If (dsquery group -name $Account)
                             {
-                            $MessageboxTitle = "SUCCESS"
                             $MessageboxBody = "$Account created successfully"
-                            Display-Info
+                            Display-Success
                             } ELSE {
-                                $MessageboxTitle = "ERROR"
                                 $MessageboxBody = "$Account not created. Aborting operation"
-                                Display-Info
+                                Display-Error
                                 }
                     }
             } ELSE {
@@ -2180,9 +2181,8 @@ $WPFbtn_createGroup.Add_Click({
                         New-ADGroup -name $Account -GroupScope Global -GroupCategory Security -DisplayName $Account -Path $GrpPath
                         If (dsquery group -name $Account)
                             {
-                            $MessageboxTitle = "SUCCESS"
                             $MessageboxBody = "$Account created successfully"
-                            Display-Info
+                            Display-Success
                             Set-GroupNTFSAccess $Account $Path $AccessRights
 
                             $AccessRights = "ReadAndExecute"
@@ -2196,15 +2196,13 @@ $WPFbtn_createGroup.Add_Click({
                             
                                 Set-GroupNTFSAccess $Account $Path $AccessRights
                                 } ELSE {
-                                    $MessageboxTitle = "ERROR"
                                     $MessageboxBody = "$Account not created. Aborting operation"
-                                    Display-Info
+                                    Display-Error
                                     }
 
                             } ELSE {
-                                $MessageboxTitle = "ERROR"
                                 $MessageboxBody = "$Account not created. Aborting operation"
-                                Display-Info
+                                Display-Error
                                 }
                         }
                     }
@@ -2215,6 +2213,7 @@ $WPFbtn_createGroup.Add_Click({
 
 ### Add Folder Author Access to Group ###
 $WPFbtn_addGrpAuthor.Add_Click({
+    $Global:LogModule = "GroupFolderAuthor"
     $Account = $WPFtxtbox_ADCmds_group.Text
     $Account = $Account.Trim()
     $Path = $WPFtxtbox_ADCmds_dirpath.Text
@@ -2224,13 +2223,11 @@ $WPFbtn_addGrpAuthor.Add_Click({
     # Check for blanks
     If (($Account -eq " ") -or ($account -eq "") -or ($account -eq $null))
         {
-        $MessageboxTitle = "WARNING"
         $Messageboxbody = "Cannot add group Author access as Group name is blank."
         Display-Warning
         } ELSE {
         If (($Path -eq " ") -or ($Path -eq "") -or ($Path -eq $null))
             {
-            $MessageboxTitle = "WARNING"
             $Messageboxbody = "Cannot add group Author access as Directory path is blank."
             Display-Warning
             } ELSE {
@@ -2243,6 +2240,7 @@ $WPFbtn_addGrpAuthor.Add_Click({
 
 ### Add Folder Read only Access to Group ###
 $WPFbtn_addread.Add_Click({
+    $Global:LogModule = "GroupFolderReadExec"
     $Account = $WPFtxtbox_ADCmds_group.Text
     $Account = $Account.Trim()
     $Path = $WPFtxtbox_ADCmds_dirpath.Text
@@ -2252,13 +2250,11 @@ $WPFbtn_addread.Add_Click({
     # Check for blanks
     If (($Account -eq " ") -or ($account -eq "") -or ($account -eq $null))
         {
-        $MessageboxTitle = "WARNING"
         $Messageboxbody = "Cannot add group Read access as Group name is blank."
         Display-Warning
 
         If (($Path -eq " ") -or ($Path -eq "") -or ($Path -eq $null))
             {
-            $MessageboxTitle = "WARNING"
             $Messageboxbody = "Cannot add group Author access as Directory path is blank."
             Display-Warning
             } ELSE {
@@ -2437,6 +2433,7 @@ $WPFchkbox_ADNU_temp.Add_UnChecked({
 
 ## Browse for CSV of multiple new users to be imported ##
 $WPFbtn_ADNU_importCSV.Add_Click({
+    $Global:LogModule = "LoadCSVMultiADNU"
 
     Add-Type -AssemblyName System.Windows.Forms
     $FileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{
@@ -2456,7 +2453,9 @@ $WPFbtn_ADNU_importCSV.Add_Click({
         }
 
     $WPFtxtbox_ADNU_filebrowse.text = $file
-
+    $LogStatus = "INFO"
+    $LogMSG = "Imported CSV: $file"
+    Update-LogFile $LogStatus $Global:LogModule $LogMSG
 })
 
 ## Validate entered data on Validate button click
@@ -2464,6 +2463,8 @@ $WPFbtn_ADNU_validate.Add_Click({
     Reset-UserInputVars
     # Reset any highlighted errors from a previous validation
     Reset-ADNUErrors
+    $Global:LogModule = "ADNUValidate"
+    $LogMsg = @()
     
     #Collect user input into variables and clean the data
     $Site = $WPFcombo_ADNU_Site.SelectedValue
@@ -2539,9 +2540,7 @@ $WPFbtn_ADNU_validate.Add_Click({
         {
         $errorcount++
         $WPFtxtblock_ADNU_errorexpiry.Visibility = "Visible"
-        $LogStatus = "WARNING"
-        $LogMSG = "ADNU Temp User is checked but no expiry date entered"
-        Update-LogFile $LogStatus $LogMSG
+        $LogMSG += "Temp User is checked but no expiry date entered; "
         }
 
     If ($tempuser -eq $true)
@@ -2555,9 +2554,7 @@ $WPFbtn_ADNU_validate.Add_Click({
         {
         $errorcount++
         $WPFtxtblock_ADNU_errorsite.Visibility = "Visible"
-        $LogStatus = "WARNING"
-        $LogMSG = "ADNU Site code not selected"
-        Update-LogFile $LogStatus $LogMSG
+        $LogMSG += "Site code not selected; "
         }
 
     # If the firstname is left blank, error
@@ -2565,9 +2562,7 @@ $WPFbtn_ADNU_validate.Add_Click({
         {
         $errorcount++
         $WPFtxtblock_ADNU_errorfirst.Visibility = "Visible"
-        $LogStatus = "WARNING"
-        $LogMSG = "ADNU First name is blank"
-        Update-LogFile $LogStatus $LogMSG
+        $LogMSG += "First name is blank; "
         }
 
     # If the lastname is left blank, error
@@ -2575,9 +2570,7 @@ $WPFbtn_ADNU_validate.Add_Click({
         {
         $errorcount++
         $WPFtxtblock_ADNU_errorlast.Visibility = "Visible"
-        $LogStatus = "WARNING"
-        $LogMSG = "ADNU Last name is blank"
-        Update-LogFile $LogStatus $LogMSG
+        $LogMSG += "Last name is blank; "
         }
         
     # If logon name is blank, error
@@ -2585,18 +2578,14 @@ $WPFbtn_ADNU_validate.Add_Click({
         {
         $errorcount++
         $WPFtxtblock_ADNU_errorlogon.Visibility = "Visible"
-        $LogStatus = "WARNING"
-        $LogMSG = "ADNU Logon name is blank"
-        Update-LogFile $LogStatus $LogMSG
+        $LogMSG += "Logon name is blank; "
         } ELSE {
                 # Checks that the logon name is unique
                 If (dsquery user -samid $logonname)
                     {
                     $errorcount++
                     $WPFtxtblock_ADNU_errorlogonunique.Visibility = "Visible"
-                    $LogStatus = "WARNING"
-                    $LogMSG = "ADNU $logonname is not unique"
-                    Update-LogFile $LogStatus $LogMSG
+                    $LogMSG += "$logonname is not unique; "
                     }
                 }
 
@@ -2605,9 +2594,7 @@ $WPFbtn_ADNU_validate.Add_Click({
         {
         $errorcount++
         $WPFtxtblock_ADNU_errordisp.Visibility = "Visible"
-        $LogStatus = "WARNING"
-        $LogMSG = "ADNU display name is blank"
-        Update-LogFile $LogStatus $LogMSG
+        $LogMSG += "Display name is blank; "
         }
 
     # If manager name is blank, error
@@ -2615,18 +2602,14 @@ $WPFbtn_ADNU_validate.Add_Click({
         {
         $errorcount++
         $WPFtxtblock_ADNU_errormgr.Visibility = "Visible"
-        $LogStatus = "WARNING"
-        $LogMSG = "ADNU manager name is blank"
-        Update-LogFile $LogStatus $LogMSG
+        $LogMSG += "Manager name is blank; "
         } ELSE {
                 # Check the inputted manager exists in AD
                 If (!(dsquery user -samid $manager))
                     {
                     $errorcount++
                     $WPFtxtblock_ADNU_errormgrunique.Visibility = "Visible"
-                    $LogStatus = "WARNING"
-                    $LogMSG = "ADNU entered manager does not exist in AD"
-                    Update-LogFile $LogStatus $LogMSG
+                    $LogMSG += "Entered manager does not exist in AD; "
                     }
                 }
     # If Job Title is blank, error
@@ -2634,28 +2617,26 @@ $WPFbtn_ADNU_validate.Add_Click({
         {
         $errorcount++
         $WPFtxtblock_ADNU_errortitle.Visibility = "Visible"
-        $LogStatus = "WARNING"
-        $LogMSG = "ADNU job title is blank"
-        Update-LogFile $LogStatus $LogMSG
+        $LogMSG += "Job title is blank; "
         }
     # If Dept is blank, error.
         If (($dept -eq "") -or ($dept -eq $null))
         {
         $errorcount++
         $WPFtxtblock_ADNU_errordept.Visibility = "Visible"
-        $LogStatus = "WARNING"
-        $LogMSG = "ADNU department is blank"
-        Update-LogFile $LogStatus $LogMSG
+        $LogMSG += "Department is blank"
         }
 
     ## If errors are present, highlight issues.
     If ($errorcount -ne 0)
         {
         $ButtonType = [System.Windows.MessageBoxButton]::OK
-        $MessageboxTitle = "Check errors"
+        $MessageboxTitle = "ERROR"
         $Messageboxbody = "There are $errorcount error(s). Please ensure to all reqired fields marked with excalamation marks ! are completed and action any other errors as displayed."
-        $MessageIcon = [System.Windows.MessageBoxImage]::Warning
+        $MessageIcon = [System.Windows.MessageBoxImage]::ERROR
         [System.Windows.Messagebox]::Show($Messageboxbody,$MessageboxTitle,$ButtonType,$MessageIcon)
+        $LogStatus = "WARNING"
+        Update-LogFile $LogStatus $LogModule $LogMSG
         }
 
     ## If no errors, disable all fields so data cannot be changed. Then, enable the Edit (in case the user does want to edit the info) and Create User buttons.
@@ -2677,7 +2658,6 @@ $WPFbtn_ADNU_validate.Add_Click({
         $WPFbtn_ADNU_validate.IsEnabled = $false
         $WPFbtn_ADNU_edit.IsEnabled = $true
         $WPFbtn_ADNU_Create.IsEnabled = $true
-        $MessageboxTitle = "INFO"
         $Messageboxbody = "User info has been validated. To make changes, click Edit. To proceed, click Create User."
         Display-Info
         }
@@ -2686,13 +2666,14 @@ $WPFbtn_ADNU_validate.Add_Click({
 
 ## Reset the New AD users form
 $WPFbtn_ADNU_resetform.Add_Click({
+    $Global:LogModule = "ADNUReset"
     Reset-UserInputVars
     Reset-ADNUErrors
     Reset-ADNUForm
     Reset-ADNUFormValues
     $LogStatus = "INFO"
     $LogMSG = "ADNU form reset"
-    Update-LogFile $LogStatus $LogMSG
+    Update-LogFile $LogStatus $LogModule $LogMSG
 })
 
 ## If user wants to edit the data before submitting, the edit button will enable the data entry fields and disable the create user button until validated again.
@@ -2724,10 +2705,18 @@ $WPFbtn_ADNU_Create.Add_Click({
 
     If ($WPFradio_ADNU_Single.IsChecked -eq $true) {
     Create-SingleADUser
+    $Global:LogModule = "SingleADNU"
+    $LogStatus = "INFO"
+    $LogMSG = "Create Single AD new user"
+    Update-LogFile $LogStatus $LogModule $LogMSG
     }
 
     If ($WPFradio_ADNU_Multi.IsChecked -eq $true) {
     Create-MultiADUser
+    $Global:LogModule = "MultiADNU"
+    $LogStatus = "INFO"
+    $LogMSG = "Create Multiple AD new user"
+    Update-LogFile $LogStatus $LogModule $LogMSG
     }
 
 })
@@ -2836,6 +2825,7 @@ $WPFchkbox_EADUI_AdditionalAtts.Add_UnChecked({
 
 ## When the Export button is clicked, validate data, set attributes to be exported and then export
 $WPFbtn_EADUI_export.Add_Click({
+    
     $errorcount = 0
     $WPFtxtblock_EADUI_errorusername.Visibility = "Hidden"
     $WPFtxtblock_EADUI_erroruserunique.Visibility = "Hidden"
@@ -2849,28 +2839,38 @@ $WPFbtn_EADUI_export.Add_Click({
 
     If ($WPFradio_EADUI_User.IsChecked)
         {
-
+        $Global:LogModule = "ExportADUserDetails"
         If (($username -eq $null) -or ($username -eq ""))
             {
             $errorcount++
             $WPFtxtblock_EADUI_errorusername.Visibility = "Visible"
             $WPFtxtbox_EADUI_username.Text = $username
+            $LogStatus = "WARNING"
+            $LogMSG = "Username is blank"
+            Update-LogFile $LogStatus $LogModule $LogMSG
             } ELSE {
                     If (!(dsquery user -samid $username))
                         {
                         $errorcount++
                         $WPFtxtblock_EADUI_erroruserunique.Visibility = "Visible"
                         $WPFtxtbox_EADUI_username.Text = $username
+                        $LogStatus = "WARNING"
+                        $LogMSG = "$Username does not exist in AD."
+                        Update-LogFile $LogStatus $LogModule $LogMSG
                         }
                      }
         }
 
     If ($WPFradio_EADUI_OU.IsChecked)
         {
+        $Global:LogModule = "ExportADUsersinOUDetails"
         If (($site -eq $null) -or ($site -eq ""))
             {
             $errorcount++
             $WPFtxtblock_EADUI_errorsite.Visibility = "Visible"
+            $LogStatus = "WARNING"
+            $LogMSG = "Site code is blank"
+            Update-LogFile $LogStatus $LogModule $LogMSG
             } 
         }
 
@@ -3016,23 +3016,18 @@ $WPFbtn_EADUI_export.Add_Click({
         If($WPFradio_EADUI_OU.IsChecked)
             {
             $exportdir = "C:\" + "$Site" + "_Users_export.csv"
-
             Get-ADUser -Filter * -SearchBase $OU -Properties $attributes | Export-csv $exportdir
-
-            $MessageboxTitle = "SUCCESS"
             $Messageboxbody = "Users details in $OU exported to: $exportdir"
-            Display-Info 
+            Display-Success
             $WPFtxtbox_EADUI_username.text = $null
             }
 
         If ($WPFradio_EADUI_User.IsChecked)
             {
             $exportdir = "C:\" + "$Username" + "_export.csv"
-
             Get-ADUser -Identity $username -Properties $attributes | Export-csv $exportdir
-            $MessageboxTitle = "SUCCESS"
             $Messageboxbody = "$username details exported to: $exportdir"
-            Display-Info  
+            Display-Success
             $WPFcombo_EADUI_site.SelectedValue = $null
                         }
         }
@@ -3051,7 +3046,7 @@ Load-CSVData
 Load-LauncherButtons
 Load-ComboBoxes
 Load-Logs
-#CLS
+CLS
 Write-Host -ForegroundColor Cyan "IT Admin Tool $Version"
 Write-Host -ForegroundColor Cyan "Running with Credentials: $env:USERNAME"
 Write-Host -ForegroundColor Red "Do NOT close this window. Please use the GUI to interact with the IT Admin Tool."
