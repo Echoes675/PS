@@ -1,4 +1,4 @@
-$Global:version = "Version 1.2.0"
+$Global:version = "Version 1.2.1"
 $Global:installpath = $PSScriptRoot
 
 Add-Type -AssemblyName PresentationCore,PresentationFramework
@@ -13,7 +13,8 @@ $inputXML = @"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IT_Admin_Tool"
         mc:Ignorable="d"
-        Title="IT Admin Tool" Height="699.609" Width="800" ResizeMode="NoResize">
+        Title="IT Admin Tool" Height="699.609" Width="800" ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen">
     <Grid Background="#FFE5E5E5">
         <TabControl Margin="0,34,240,32">
             <TabItem x:Name="tab_launcher" Header="Launcher">
@@ -56,39 +57,44 @@ $inputXML = @"
                     <GroupBox x:Name="grpbox_ADCmds_groups" Header="Groups" HorizontalAlignment="Left" Height="67" Margin="10,393,0,0" VerticalAlignment="Top" Width="483"/>
                     <GroupBox x:Name="grpbox_ADCmds_computers" Header="Computers" HorizontalAlignment="Left" Height="124" Margin="10,264,0,0" VerticalAlignment="Top" Width="483"/>
                     <GroupBox x:Name="grpbox_ADCmds_Users" Header="Users" HorizontalAlignment="Left" Height="115" Margin="10,144,0,0" VerticalAlignment="Top" Width="483"/>
+                    
                     <TextBox x:Name="txtbox_ADCmds_username" Height="26" Margin="113,15,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" HorizontalAlignment="Left" Width="203" VerticalScrollBarVisibility="Disabled"/>
                     <Label x:Name="label_Username" Content="Username:" HorizontalAlignment="Left" Margin="42,15,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btn_unlock" Content="Unlock account" HorizontalAlignment="Left" Margin="28,173,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
-                    <Button x:Name="btn_resetPWD" Content="Password Reset" HorizontalAlignment="Left" Margin="135,173,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
                     <TextBox x:Name="txtbox_ADCmds_computername" HorizontalAlignment="Left" Height="26" Margin="113,41,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="203" VerticalScrollBarVisibility="Disabled"/>
                     <Label x:Name="label_computername" Content="Computer name:" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top" Height="26" Width="98"/>
-                    <Button x:Name="btn_exportGroups" Content="Export Groups" HorizontalAlignment="Left" Margin="240,173,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
-                    <ComboBox x:Name="combobox_ADCmds_site" HorizontalAlignment="Left" Margin="392,15,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
-                    <Label x:Name="label_Site" Content="Site:" HorizontalAlignment="Left" Margin="360,15,0,0" VerticalAlignment="Top" Height="26" RenderTransformOrigin="0.911,0.674"/>
-                    <Button x:Name="btn_computeracc" Content="Create Account" HorizontalAlignment="Left" Margin="135,348,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
                     <TextBox x:Name="txtbox_ADCmds_group" HorizontalAlignment="Left" Height="26" Margin="113,67,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="203" VerticalScrollBarVisibility="Disabled"/>
                     <Label x:Name="label_group" Content="Group name:" HorizontalAlignment="Left" Margin="28,67,0,0" VerticalAlignment="Top" Height="26" Width="80"/>
                     <TextBox x:Name="txtbox_ADCmds_dirpath" HorizontalAlignment="Left" Height="26" Margin="113,93,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="379" VerticalScrollBarVisibility="Disabled"/>
                     <Label x:Name="label_dirpath" Content="Directory Path:" HorizontalAlignment="Left" Margin="19,93,0,0" VerticalAlignment="Top" Height="26" Width="89"/>
 
-                    <Button x:Name="btn_exportMembers" Content="Export Members" HorizontalAlignment="Left" Margin="28,419,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
-                    <Button x:Name="btn_loggedOn" Content="Logged on User" HorizontalAlignment="Left" Margin="28,302,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
-                    <Button x:Name="btn_lastBoot" Content="Last Boot" HorizontalAlignment="Left" Margin="135,302,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+                    <Label x:Name="label_Site" Content="Site:" HorizontalAlignment="Left" Margin="360,15,0,0" VerticalAlignment="Top" Height="26" RenderTransformOrigin="0.911,0.674"/>
+                    <ComboBox x:Name="combobox_ADCmds_site" HorizontalAlignment="Left" Margin="392,15,0,0" VerticalAlignment="Top" Width="100" Height="26"/>
                     <ComboBox x:Name="combobox_kittype" HorizontalAlignment="Left" Margin="392,41,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
                     <Label x:Name="label_kittype" Content="Kit Type:" HorizontalAlignment="Left" Margin="337,41,0,0" VerticalAlignment="Top"/>
                     <ComboBox x:Name="combobox_GrpType" HorizontalAlignment="Left" Margin="392,67,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
                     <Label x:Name="label_Grptype" Content="Group Type:" HorizontalAlignment="Left" Margin="317,67,0,0" VerticalAlignment="Top"/>
-                    <Button x:Name="btn_discomputeracc" Content="Disable Account" HorizontalAlignment="Left" Margin="240,302,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
-                    <Button x:Name="btn_encomputeracc" Content="Enable Account" HorizontalAlignment="Left" Margin="345,302,0,0" VerticalAlignment="Top" Width="105" Height="26" IsEnabled="False"/>
+
+                    <Button x:Name="btn_unlock" Content="Unlock account" HorizontalAlignment="Left" Margin="28,173,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+                    <Button x:Name="btn_resetPWD" Content="Password Reset" HorizontalAlignment="Left" Margin="135,173,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+                    <Button x:Name="btn_exportGroups" Content="Export Groups" HorizontalAlignment="Left" Margin="240,173,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
                     <Button x:Name="btn_addlocalAdmin" Content="Add Local Admin" HorizontalAlignment="Left" Margin="28,219,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
                     <Button x:Name="btn_remlocalAdmin" Content="Rmv Loc Admin" HorizontalAlignment="Left" Margin="135,219,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
-                    <Button x:Name="btn_createGroup" Content="Create Group" HorizontalAlignment="Left" Margin="135,419,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
                     <Button x:Name="btn_addUsertoGroup" Content="Add to Group" HorizontalAlignment="Left" Margin="240,219,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
                     <Button x:Name="btn_rmvUserfromGroup" Content="Remove from Grp" HorizontalAlignment="Left" Margin="345,219,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+                                        
+                    <Button x:Name="btn_loggedOn" Content="Logged on User" HorizontalAlignment="Left" Margin="28,302,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+                    <Button x:Name="btn_lastBoot" Content="Last Boot" HorizontalAlignment="Left" Margin="135,302,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+                    <Button x:Name="btn_discomputeracc" Content="Disable Account" HorizontalAlignment="Left" Margin="240,302,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+                    <Button x:Name="btn_encomputeracc" Content="Enable Account" HorizontalAlignment="Left" Margin="345,302,0,0" VerticalAlignment="Top" Width="105" Height="26" IsEnabled="False"/>
+                    <Button x:Name="btn_nextavailacc" Content="Next Avail Acc" HorizontalAlignment="Left" Margin="28,348,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+                    <Button x:Name="btn_computeracc" Content="Create Account" HorizontalAlignment="Left" Margin="135,348,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+                    <Button x:Name="btn_chknetconf" Content="Network Config" HorizontalAlignment="Left" Margin="240,348,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+
+                    <Button x:Name="btn_exportMembers" Content="Export Members" HorizontalAlignment="Left" Margin="28,419,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
+                    <Button x:Name="btn_createGroup" Content="Create Group" HorizontalAlignment="Left" Margin="135,419,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
                     <Button x:Name="btn_addGrpAuthor" Content="Add as Author" HorizontalAlignment="Left" Margin="240,419,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
                     <Button x:Name="btn_addread" Content="Add as Read Only" HorizontalAlignment="Left" Margin="345,419,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
-                    <Button x:Name="btn_nextavailacc" Content="Next Avail Acc" HorizontalAlignment="Left" Margin="28,348,0,0" VerticalAlignment="Top" Width="100" Height="26" IsEnabled="False"/>
-
+                                        
                 </Grid>
             </TabItem>
             <TabItem x:Name="tab_NewADUser" Header="New AD User">
@@ -265,6 +271,7 @@ function Reset-UserInputVars{
     $Global:streetAddress = $null
     $Global:userPrincipalName = $null
     $Global:SiteOU = $null
+    $Global:errorcount = $null
 }
 
 function Reset-ADNUFormValues{
@@ -810,6 +817,7 @@ function Set-GroupNTFSAccess ($Account,$Path,$AccessRights){
                 Display-Error
                 }
         }
+    Get-module | Remove-Module
 }
 
 function Reset-ADCmdsForm{
@@ -949,6 +957,7 @@ function Create-SingleADUser{
                $Messageboxbody = "Failed to create user account $logonname. Job aborted!"
                Display-Error 
                }
+    Get-module | Remove-Module
 }
 
 function Create-MultiADUser{
@@ -1186,7 +1195,32 @@ function Create-MultiADUser{
             }
 
         } # end foreach NewUserData in multiuserCSV
+    
+    # Finished processing CSV.
+    $LogMSG = "Finished processing CSV: " + $WPFtxtbox_ADNU_filebrowse.text
+    $LogStatus = "INFO"
+    Update-LogFile $LogStatus $LogModule $LogMSG
+    Get-module | Remove-Module
 }
+
+function Get-NetworkDetails { 
+    param ($strComputer) 
+    # PowerShell cmdlet to interrogate the Network Adapter
+
+    $colItems = Get-WmiObject -class "Win32_NetworkAdapterConfiguration" `
+        -computername $strComputer | Where {($_.description -match "Ethernet") -or ($_.description -match "Wireless") -or ($_.description -match "Intel") -or ($_.description -match "Broadcom")} | Select Description , MACAddress , IPAddress , IPEnabled , DNSServerSearchOrder
+    $messageboxbody = "$strComputer Network Adapters"
+
+    foreach ($objItem in $colItems) {
+            $messageboxbody = $messageboxbody + "`n"
+            $messageboxbody = $messageboxbody + "`nDescription: " + $objItem.Description
+            $messageboxbody = $messageboxbody + "`nMACAddress: " + $objItem.MACAddress
+            $messageboxbody = $messageboxbody + "`nIPAddress: " + $objItem.IPAddress
+            $messageboxbody = $messageboxbody + "`nIPEnabled: " + $objItem.IPEnabled
+            $messageboxbody = $messageboxbody + "`nDNSServers: " + $objItem.DNSServerSearchOrder
+        } 
+    Display-Info
+} 
 
 #=======================#
 # Main Launcher Buttons #
@@ -1196,7 +1230,7 @@ function Create-MultiADUser{
 
 ### Button A1 ###
 $WPFbtn_A1.Add_Click({ 
-
+$Global:LogModule = "AppLauncher"
 If (($prerun_A1 -ne $null) -and ($prerun_A1 -ne ""))
     {
     Invoke-Expression $prerun_A1
@@ -1209,6 +1243,7 @@ If (($prerun_A1 -ne $null) -and ($prerun_A1 -ne ""))
  
 ### Button A2 ###
 $WPFbtn_A2.Add_Click({ 
+$Global:LogModule = "AppLauncher"
 If (($prerun_A2 -ne $null) -and ($prerun_A2 -ne ""))
     {
     Invoke-Expression $prerun_A2
@@ -1221,6 +1256,7 @@ If (($prerun_A2 -ne $null) -and ($prerun_A2 -ne ""))
 
 ### Button A3 ###
 $WPFbtn_A3.Add_Click({ 
+$Global:LogModule = "AppLauncher"
 If (($prerun_A3 -ne $null) -and ($prerun_A3 -ne ""))
     {
     Invoke-Expression $prerun_A3
@@ -1233,6 +1269,7 @@ If (($prerun_A3 -ne $null) -and ($prerun_A3 -ne ""))
 
 ### Button A4 ###
 $WPFbtn_A4.Add_Click({ 
+$Global:LogModule = "AppLauncher"
 If (($prerun_A4 -ne $null) -and ($prerun_A4 -ne ""))
     {
     Invoke-Expression $prerun_A4
@@ -1245,6 +1282,7 @@ If (($prerun_A4 -ne $null) -and ($prerun_A4 -ne ""))
 
 ### Button A5 ###
 $WPFbtn_A5.Add_Click({
+$Global:LogModule = "AppLauncher"
 If (($prerun_A5 -ne $null) -and ($prerun_A5 -ne ""))
     {
     Invoke-Expression $prerun_A5
@@ -1257,6 +1295,7 @@ If (($prerun_A5 -ne $null) -and ($prerun_A5 -ne ""))
 
 ### Button A5 ###
 $WPFbtn_A6.Add_Click({
+$Global:LogModule = "AppLauncher"
 If (($prerun_A6 -ne $null) -and ($prerun_A6 -ne ""))
     {
     Invoke-Expression $prerun_A6
@@ -1269,6 +1308,7 @@ If (($prerun_A6 -ne $null) -and ($prerun_A6 -ne ""))
 
 ### Button B1 ###
 $WPFbtn_B1.Add_Click({
+$Global:LogModule = "AppLauncher"
 If (($prerun_B1 -ne $null) -and ($prerun_B1 -ne ""))
     {
     Invoke-Expression $prerun_B1
@@ -1281,6 +1321,7 @@ If (($prerun_B1 -ne $null) -and ($prerun_B1 -ne ""))
 
 ### Button B2 ###
 $WPFbtn_B2.Add_Click({ 
+$Global:LogModule = "AppLauncher"
 If (($prerun_B2 -ne $null) -and ($prerun_B2 -ne ""))
     {
     Invoke-Expression $prerun_B2
@@ -1293,6 +1334,7 @@ If (($prerun_B2 -ne $null) -and ($prerun_B2 -ne ""))
 
 ### Button B3 ###
 $WPFbtn_B3.Add_Click({
+$Global:LogModule = "AppLauncher"
 If (($prerun_B3 -ne $null) -and ($prerun_B3 -ne ""))
     {
     Invoke-Expression $prerun_B3
@@ -1305,6 +1347,7 @@ If (($prerun_B3 -ne $null) -and ($prerun_B3 -ne ""))
 
 ### Button B4 ###
 $WPFbtn_B4.Add_Click({
+$Global:LogModule = "AppLauncher"
 If (($prerun_B4 -ne $null) -and ($prerun_B4 -ne ""))
     {
     Invoke-Expression $prerun_B4
@@ -1317,6 +1360,7 @@ If (($prerun_B4 -ne $null) -and ($prerun_B4 -ne ""))
 
 ### Button B5 ###
 $WPFbtn_B5.Add_Click({
+$Global:LogModule = "AppLauncher"
 If (($prerun_B5 -ne $null) -and ($prerun_B5 -ne ""))
     {
     Invoke-Expression $prerun_B5
@@ -1329,6 +1373,7 @@ If (($prerun_B5 -ne $null) -and ($prerun_B5 -ne ""))
 
 ### Button B6 ###
 $WPFbtn_B5.Add_Click({
+$Global:LogModule = "AppLauncher"
 If (($prerun_B6 -ne $null) -and ($prerun_B6 -ne ""))
     {
     Invoke-Expression $prerun_B6
@@ -1525,6 +1570,7 @@ $WPFtxtbox_ADCmds_computername.Add_TextChanged({
         $WPFbtn_lastBoot.IsEnabled = $True
         $WPFbtn_discomputeracc.IsEnabled = $True
         $WPFbtn_encomputeracc.IsEnabled = $True
+        $WPFbtn_chknetconf.IsEnabled = $True
 
         # If text is entered in Username and Computername fields
         If (($WPFtxtbox_ADCmds_username.text -ne " ") -and ($WPFtxtbox_ADCmds_username.text -ne "") -and ($WPFtxtbox_ADCmds_username.text -ne $null)){
@@ -1542,7 +1588,8 @@ $WPFtxtbox_ADCmds_computername.Add_TextChanged({
         $WPFbtn_lastBoot.IsEnabled = $false
         $WPFbtn_discomputeracc.IsEnabled = $false
         $WPFbtn_encomputeracc.IsEnabled = $false
-        $WPFbtn_nextavailacc.IsEnabled = $false        
+        $WPFbtn_nextavailacc.IsEnabled = $false  
+        $WPFbtn_chknetconf.IsEnabled = $false      
         }
 })
 
@@ -1619,10 +1666,12 @@ $WPFbtn_unlock.Add_Click({
                 If (dsquery user -samid $username)
                         {
                         Do {
-                            If ((Get-ADUser  $username -Properties LockedOut | Select-Object LockedOut) -eq $true)
+                            $Lockchk = (Get-ADUser -identity $username -Properties LockedOut | Select-Object LockedOut)
+                            If ($Lockchk.LockedOut -eq $true)
                                 {
                                     Unlock-ADAccount -identity $username
-                                    If ((Get-ADUser  $username -Properties LockedOut | Select-Object LockedOut) -eq $false)
+                                    $Lockchk = (Get-ADUser -identity $username -Properties LockedOut | Select-Object LockedOut)
+                                    If ($Lockchk.LockedOut -eq $false)
                                     {
                                     $attempt = 5
                                     $Messageboxbody = "$Username" + "'s account has been unlocked!"
@@ -1672,7 +1721,13 @@ $WPFbtn_resetPWD.Add_Click({
              $attempt = 0
                 If (dsquery user -samid $username)
                         {
+                        $CustomPaswd = $null
                         $Paswd = "TempPwd2017"
+                        $CustomPaswd = Read-Host -prompt "Enter a new password. (or leave blank to use default: '$Paswd')"
+                        If (($CustomPaswd -eq $null) -or ($CustomPaswd -eq ""))
+                            {
+                            $Paswd = $CustomPaswd
+                            }
                         $SecPaswd= ConvertTo-SecureString –String "$Paswd" –AsPlainText –Force
                         Set-ADAccountPassword -Reset -NewPassword $SecPaswd –Identity $username
                         Unlock-ADAccount -identity $username
@@ -2106,6 +2161,41 @@ $WPFbtn_computeracc.Add_Click({
 
 })
 
+### Check Network details of computer ###
+$WPFbtn_chknetconf.Add_Click({
+    
+    $Global:LogModule = "ComputerNetDetails"
+    $computername = $WPFtxtbox_ADCmds_computername.Text
+    $computername = $computername.trim()
+
+    If (($computername -eq "") -or ($computername -eq " ") -or ($computername -eq $null))
+        {
+        $Messageboxbody = "Cannot check last boot as Computer name is blank."
+        Display-Warning
+        }ELSE{
+             #Check the machine is online.
+             IF (-not (Test-Connection -comp $computername -quiet))
+                {
+                $Messageboxbody = "Cannot check last boot as $computername is offline or unreachable"
+                Display-Error
+                }ELSE{
+                     IF (dsquery computer -name $computername)
+                        {
+                        #$strComputer = $computername
+                        Get-NetworkDetails $computername
+                        }ELSE
+                            {
+                            $Messageboxbody = "Cannot check last boot as $computername does not exist in AD."
+                            Display-Error
+                            }
+                      }
+            }
+    Reset-ADCmdsForm
+    Get-module | Remove-Module 
+
+
+})
+
 
 ########## GROUPS ##########
 
@@ -2461,6 +2551,7 @@ $WPFbtn_ADNU_importCSV.Add_Click({
 ## Validate entered data on Validate button click
 $WPFbtn_ADNU_validate.Add_Click({
     Reset-UserInputVars
+    $errorcount = 0
     # Reset any highlighted errors from a previous validation
     Reset-ADNUErrors
     $Global:LogModule = "ADNUValidate"
@@ -3046,7 +3137,7 @@ Load-CSVData
 Load-LauncherButtons
 Load-ComboBoxes
 Load-Logs
-CLS
+#CLS
 Write-Host -ForegroundColor Cyan "IT Admin Tool $Version"
 Write-Host -ForegroundColor Cyan "Running with Credentials: $env:USERNAME"
 Write-Host -ForegroundColor Red "Do NOT close this window. Please use the GUI to interact with the IT Admin Tool."
